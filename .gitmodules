@@ -1,0 +1,3 @@
+[submodule "TinyIndex"]
+	path = TinyIndex
+	url = https://github.com/DidacticalEnigma/TinyIndex
