@@ -33,7 +33,6 @@
     <Compile Include="..\AutomatedTests.Common\Sandbox.cs" Link="Sandbox.cs" />
     <Compile Include="..\AutomatedTests.Common\SentenceParserTests.cs" Link="SentenceParserTests.cs" />
     <Compile Include="..\AutomatedTests.Common\SerializerExtTests.cs" Link="SerializerExtTests.cs" />
-    <Compile Include="..\AutomatedTests.Common\SimpleProjectTests.cs" Link="SimpleProjectTests.cs" />
     <Compile Include="..\AutomatedTests.Common\StringExtTests.cs" Link="StringExtTests.cs" />
     <Compile Include="..\AutomatedTests.Common\Tagger.cs" Link="Tagger.cs" />
     <Compile Include="..\AutomatedTests.Common\TestDataPaths.cs" Link="TestDataPaths.cs" />

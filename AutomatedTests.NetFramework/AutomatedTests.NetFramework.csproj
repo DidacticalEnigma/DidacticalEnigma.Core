@@ -190,9 +190,6 @@
     <Compile Include="..\AutomatedTests.Common\SerializerExtTests.cs">
       <Link>SerializerExtTests.cs</Link>
     </Compile>
-    <Compile Include="..\AutomatedTests.Common\SimpleProjectTests.cs">
-      <Link>SimpleProjectTests.cs</Link>
-    </Compile>
     <Compile Include="..\AutomatedTests.Common\StringExtTests.cs">
       <Link>StringExtTests.cs</Link>
     </Compile>
@@ -221,10 +218,6 @@
     <ProjectReference Include="..\JDict\JDict.csproj">
       <Project>{82e18376-40e8-4f9d-bc46-e166354bccb3}</Project>
       <Name>JDict</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\TinyIndex\TinyIndex\TinyIndex.csproj">
-      <Project>{41b81c6b-c466-4c3f-8460-3ef2288a33d8}</Project>
-      <Name>TinyIndex</Name>
     </ProjectReference>
     <ProjectReference Include="..\Utility\Utility.csproj">
       <Project>{6014edb7-3375-4d85-90a5-4db7638d7b39}</Project>

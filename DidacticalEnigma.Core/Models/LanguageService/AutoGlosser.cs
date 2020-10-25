@@ -2,11 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using DidacticalEnigma.Core.Models.Project;
-using DidacticalEnigma.Core.Utils;
 using JDict;
 using JetBrains.Annotations;
-using Optional;
 using Utility.Utils;
 
 namespace DidacticalEnigma.Core.Models.LanguageService
