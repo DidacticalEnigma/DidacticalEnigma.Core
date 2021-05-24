@@ -71,7 +71,7 @@ namespace DidacticalEnigma.Core.Models.DataSources
                 {
                     foreach (var sense in entry.Senses)
                     {
-                        l.Add(new Text(string.Join("/", sense.PartOfSpeechInfo.Select(pos => pos.ToDescription())), fontSize: FontSize.ExtraSmall));
+                        l.Add(new Text(string.Join("/", sense.PartOfSpeechInfo.Select(pos => jdict.FriendlyDescriptionof(pos))), fontSize: FontSize.ExtraSmall));
                         l.Add(new Text("\n"));
                         {
                             bool first = true;
@@ -80,31 +80,31 @@ namespace DidacticalEnigma.Core.Models.DataSources
                                 if(!first)
                                     l.Add(new Text(", ", fontSize: FontSize.Medium));
                                 first = false;
-                                l.Add(new Text(dialect.ToDescription(), fontSize: FontSize.Medium));
+                                l.Add(new Text(jdict.FriendlyDescriptionof(dialect), fontSize: FontSize.Medium));
                             }
                             if(!first)
                                 l.Add(new Text("\n"));
                         }
                         {
                             bool first = true;
-                            foreach (var dialect in sense.FieldData)
+                            foreach (var field in sense.FieldData)
                             {
                                 if(!first)
                                     l.Add(new Text(", ", fontSize: FontSize.Medium));
                                 first = false;
-                                l.Add(new Text(dialect.ToDescription(), fontSize: FontSize.Medium));
+                                l.Add(new Text(jdict.FriendlyDescriptionof(field), fontSize: FontSize.Medium));
                             }
                             if(!first)
                                 l.Add(new Text("\n"));
                         }
                         {
                             bool first = true;
-                            foreach (var dialect in sense.Misc)
+                            foreach (var misc in sense.Misc)
                             {
                                 if(!first)
                                     l.Add(new Text(", ", fontSize: FontSize.Medium));
                                 first = false;
-                                l.Add(new Text(dialect.ToDescription(), fontSize: FontSize.Medium));
+                                l.Add(new Text(jdict.FriendlyDescriptionof(misc), fontSize: FontSize.Medium));
                             }
                             if(!first)
                                 l.Add(new Text("\n"));

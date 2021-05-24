@@ -32,7 +32,7 @@ namespace DidacticalEnigma.Core.Models.LanguageService
                 case "五段・ワ行促音便":
                     return Option.None<EdictPartOfSpeech>();
                 case "特殊・ダ":
-                    return Option.Some(EdictPartOfSpeech.cop_da);
+                    return Option.Some(EdictPartOfSpeech.cop);
                 case "五段・バ行":
                     return Option.None<EdictPartOfSpeech>();
                 case "カ変・クル":

@@ -32,6 +32,7 @@ namespace AutomatedTests
             {
                 var entries = jmdict.Lookup("みなみ");
                 Assert.True(entries.Any(e => e.Senses.Any(s => s.Glosses.Contains("south"))));
+                Assert.True(entries.Any(e => e.Senses.Any(s => s.PartOfSpeechInfo.Contains(EdictPartOfSpeech.n))));
             }
         }
 

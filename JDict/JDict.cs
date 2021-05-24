@@ -22,7 +22,7 @@ using FileMode = System.IO.FileMode;
 
 namespace JDict
 {
-    public static class JMDict
+    public class JMDictParser : IDisposable
     {
         private static readonly XmlSerializer serializer = new XmlSerializer(typeof(JdicEntry));
 
@@ -36,101 +36,140 @@ namespace JDict
             IgnoreComments = false
         };
 
-        public static DateTime? GetVersion(Stream stream)
+        private XmlReader xmlReader;
+        
+        public DateTime? Version { get; private set; }
+        
+        public IReadOnlyDualDictionary<string, string> FriendlyNames { get; set; }
+        
+        public JdicEntry Read()
         {
-            using (var xmlReader = XmlReader.Create(stream, xmlSettings))
+            while (xmlReader.Read())
             {
-                while (xmlReader.Read())
+                if (xmlReader.NodeType == XmlNodeType.Element && xmlReader.Name == "entry")
                 {
-                    if (xmlReader.NodeType == XmlNodeType.Comment)
+                    using (
+                        var elementReader =
+                            new StringReader(xmlReader.ReadOuterXml()))
                     {
-                        var commentText = xmlReader.Value.Trim();
-                        if (commentText.StartsWith("JMdict created:", StringComparison.Ordinal))
+                        var entry = (JdicEntry)serializer.Deserialize(elementReader);
+                        entry.Senses = entry.Senses ?? Array.Empty<Sense>();
+                        entry.KanjiElements = entry.KanjiElements ?? Array.Empty<KanjiElement>();
+                        entry.ReadingElements = entry.ReadingElements ?? Array.Empty<ReadingElement>();
+                        foreach (var s in entry.Senses)
                         {
-                            var generationDate = commentText.Split(':').ElementAtOrDefault(1)?.Trim();
-                            if (DateTime.TryParseExact(generationDate, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out var date))
+                            s.Glosses = s.Glosses ?? Array.Empty<Gloss>();
+                            s.PartOfSpeech = s.PartOfSpeech ?? Array.Empty<string>();
+                            s.Antonym = s.Antonym ?? Array.Empty<string>();
+                            s.CrossRef = s.CrossRef ?? Array.Empty<string>();
+                            s.Dialect = s.Dialect ?? Array.Empty<string>();
+                            s.Field = s.Field ?? Array.Empty<string>();
+                            s.Information = s.Information ?? Array.Empty<string>();
+                            s.LoanWordSource = s.LoanWordSource ?? Array.Empty<LoanSource>();
+                            s.Misc = s.Misc ?? Array.Empty<string>();
+                            s.Stagk = s.Stagk ?? Array.Empty<string>();
+                            s.Stagkr = s.Stagkr ?? Array.Empty<string>();
+                            foreach (var gloss in s.Glosses)
                             {
-                                return date;
+                                if (gloss.Lang == null)
+                                {
+                                    gloss.Lang = "eng";
+                                }
                             }
 
-                            return null;
-                        }
-                    }
-                }
-            }
-            return null;
-        }
-
-        public static IEnumerable<JdicEntry> ParseEntries(Stream stream)
-        {
-            using (var xmlReader = XmlReader.Create(stream, xmlSettings))
-            {
-                while (xmlReader.Read())
-                {
-                    if (xmlReader.NodeType == XmlNodeType.Element && xmlReader.Name == "JMdict")
-                    {
-                        while (xmlReader.Read())
-                        {
-                            if (xmlReader.NodeType == XmlNodeType.Element && xmlReader.Name == "entry")
+                            foreach (var loanSource in s.LoanWordSource)
                             {
-                                using (
-                                    var elementReader =
-                                        new StringReader(xmlReader.ReadOuterXml()))
+                                if (loanSource.Lang == null)
                                 {
-                                    var entry = (JdicEntry)serializer.Deserialize(elementReader);
-                                    entry.Senses = entry.Senses ?? Array.Empty<Sense>();
-                                    entry.KanjiElements = entry.KanjiElements ?? Array.Empty<KanjiElement>();
-                                    entry.ReadingElements = entry.ReadingElements ?? Array.Empty<ReadingElement>();
-                                    foreach (var s in entry.Senses)
-                                    {
-                                        s.Glosses = s.Glosses ?? Array.Empty<Gloss>();
-                                        s.PartOfSpeech = s.PartOfSpeech ?? Array.Empty<string>();
-                                        s.Antonym = s.Antonym ?? Array.Empty<string>();
-                                        s.CrossRef = s.CrossRef ?? Array.Empty<string>();
-                                        s.Dialect = s.Dialect ?? Array.Empty<string>();
-                                        s.Field = s.Field ?? Array.Empty<string>();
-                                        s.Information = s.Information ?? Array.Empty<string>();
-                                        s.LoanWordSource = s.LoanWordSource ?? Array.Empty<LoanSource>();
-                                        s.Misc = s.Misc ?? Array.Empty<string>();
-                                        s.Stagk = s.Stagk ?? Array.Empty<string>();
-                                        s.Stagkr = s.Stagkr ?? Array.Empty<string>();
-                                        foreach (var gloss in s.Glosses)
-                                        {
-                                            if (gloss.Lang == null)
-                                            {
-                                                gloss.Lang = "eng";
-                                            }
-                                        }
-
-                                        foreach (var loanSource in s.LoanWordSource)
-                                        {
-                                            if (loanSource.Lang == null)
-                                            {
-                                                loanSource.Lang = "eng";
-                                            }
-                                        }
-                                    }
-
-                                    yield return entry;
+                                    loanSource.Lang = "eng";
                                 }
                             }
                         }
+
+                        return entry;
                     }
                 }
             }
+            
+            return null;
+        }
+
+        public IEnumerable<JdicEntry> ReadRemainingToEnd()
+        {
+            JdicEntry entry;
+            while ((entry = this.Read()) != null)
+            {
+                yield return entry;
+            }
+        }
+
+        public static JMDictParser Create(Stream stream)
+        {
+            DateTime? versionDate = null;
+            var undoEntityExpansionDictionary = new DualDictionary<string, string>();
+
+            var xmlReader = XmlReader.Create(stream, xmlSettings);
+            while (xmlReader.Read())
+            {
+                if (xmlReader.NodeType == XmlNodeType.DocumentType)
+                {
+                    undoEntityExpansionDictionary = new DualDictionary<string, string>(XmlEntities
+                        .ParseJMDictEntities(xmlReader.Value)
+                        .DistinctBy(kvp => kvp.Key));
+                }
+
+                if (xmlReader.NodeType == XmlNodeType.Comment)
+                {
+                    var commentText = xmlReader.Value.Trim();
+                    if (commentText.StartsWith("JMdict created:", StringComparison.Ordinal))
+                    {
+                        var generationDate = commentText.Split(':').ElementAtOrDefault(1)?.Trim();
+                        if (DateTime.TryParseExact(generationDate, "yyyy-MM-dd", CultureInfo.InvariantCulture,
+                            DateTimeStyles.AssumeUniversal, out var date))
+                        {
+                            versionDate = date;
+                        }
+                        else
+                        {
+                            versionDate = null;
+                        }
+                    }
+                }
+
+                if (xmlReader.NodeType == XmlNodeType.Element && xmlReader.Name == "JMdict")
+                {
+                    break;
+                }
+            }
+            
+            return new JMDictParser(versionDate, undoEntityExpansionDictionary, xmlReader);
+        }
+
+        private JMDictParser(DateTime? version, IReadOnlyDualDictionary<string, string> friendlyNames, XmlReader reader)
+        {
+            this.Version = version;
+            this.FriendlyNames = friendlyNames;
+            this.xmlReader = reader;
+        }
+
+        public void Dispose()
+        {
+            this.xmlReader.Dispose();
         }
     }
 
     // represents a lookup over an JMdict file
     public class JMDictLookup : IDisposable
     {
-        private static readonly Guid Version = new Guid("139D49D0-43C7-49B2-AFE1-3F0C1B923587");
+        private static readonly Guid Version = new Guid("E42B739F-86DA-4303-87E2-9C1877769D0B");
 
         private TinyIndex.Database db;
 
         private IReadOnlyDiskArray<KeyValuePair<string, IReadOnlyList<long>>> kvps;
 
         private IReadOnlyDiskArray<JMDictEntry> entries;
+
+        private IReadOnlyDiskArray<KeyValuePair<string, string>> friendlyNames;
 
         private JMDictLookup Init(Stream stream, string cache)
         {
@@ -181,51 +220,62 @@ namespace JDict
                         obj.Senses
                     });
 
-            db = TinyIndex.Database.CreateOrOpen(cache, Version)
-                .AddIndirectArray(entrySerializer, db => JMDict.ParseEntries(stream)
-                    .Select(CreateEntry),
+            using (var jmdictParser = JMDictParser.Create(stream))
+            {
+                db = TinyIndex.Database.CreateOrOpen(cache, Version)
+                    .AddIndirectArray(entrySerializer, db => jmdictParser.ReadRemainingToEnd()
+                            .Select(e => CreateEntry(e, jmdictParser.FriendlyNames.Inverse)),
                         x => x.SequenceNumber)
-                .AddIndirectArray(TinyIndex.Serializer.ForKeyValuePair(TinyIndex.Serializer.ForStringAsUTF8(), TinyIndex.Serializer.ForReadOnlyList(TinyIndex.Serializer.ForLong())), db =>
-                    {
-                        IEnumerable<KeyValuePair<long, string>> It(IEnumerable<JMDictEntry> entries)
+                    .AddIndirectArray(
+                        TinyIndex.Serializer.ForKeyValuePair(TinyIndex.Serializer.ForStringAsUTF8(),
+                            TinyIndex.Serializer.ForReadOnlyList(TinyIndex.Serializer.ForLong())), db =>
                         {
-                            foreach (var e in entries)
+                            IEnumerable<KeyValuePair<long, string>> It(IEnumerable<JMDictEntry> entries)
                             {
-                                foreach (var r in e.Kanji)
+                                foreach (var e in entries)
                                 {
-                                    yield return new KeyValuePair<long, string>(e.SequenceNumber, r);
-                                }
+                                    foreach (var r in e.Kanji)
+                                    {
+                                        yield return new KeyValuePair<long, string>(e.SequenceNumber, r);
+                                    }
 
-                                foreach (var r in e.Readings)
-                                {
-                                    yield return new KeyValuePair<long, string>(e.SequenceNumber, r);
+                                    foreach (var r in e.Readings)
+                                    {
+                                        yield return new KeyValuePair<long, string>(e.SequenceNumber, r);
+                                    }
                                 }
                             }
-                        }
 
-                        return It(db.Get<JMDictEntry>(0)
-                            .LinearScan())
-                            .GroupBy(kvp => kvp.Value, kvp => kvp.Key)
-                            .Select(x => new KeyValuePair<string, IReadOnlyList<long>>(x.Key, x.ToList()));
-                    },
-                    x => x.Key, StringComparer.Ordinal)
-                .Build();
-            entries = db.Get<JMDictEntry>(0, new LruCache<long, JMDictEntry>(128));
-            kvps = db.Get<KeyValuePair<string, IReadOnlyList<long>>>(1, new LruCache<long, KeyValuePair<string, IReadOnlyList<long>>>(128));
+                            return It(db.Get<JMDictEntry>(0)
+                                    .LinearScan())
+                                .GroupBy(kvp => kvp.Value, kvp => kvp.Key)
+                                .Select(x => new KeyValuePair<string, IReadOnlyList<long>>(x.Key, x.ToList()));
+                        },
+                        x => x.Key, StringComparer.Ordinal)
+                    .AddIndirectArray(
+                        Serializer.ForKeyValuePair(Serializer.ForStringAsUTF8(), Serializer.ForStringAsUTF8()),
+                        db => jmdictParser.FriendlyNames,
+                        x => x.Key, StringComparer.Ordinal)
+                    .Build();
+                entries = db.Get<JMDictEntry>(0, new LruCache<long, JMDictEntry>(128));
+                kvps = db.Get<KeyValuePair<string, IReadOnlyList<long>>>(1,
+                    new LruCache<long, KeyValuePair<string, IReadOnlyList<long>>>(128));
+                friendlyNames = db.Get(2, new LruCache<long, KeyValuePair<string, string>>(256));
+            }
 
             return this;
         }
 
-        private JMDictEntry CreateEntry(JdicEntry xmlEntry)
+        private JMDictEntry CreateEntry(JdicEntry xmlEntry, IReadOnlyDictionary<string, string> expandedNamesToAbbrevationsMapping)
         {
             return new JMDictEntry(
                 xmlEntry.Number,
                 xmlEntry.ReadingElements.Select(r => r.Reb).ToList(),
                 xmlEntry.KanjiElements.Select(k => k.Key).ToList(),
-                CreateSenses(xmlEntry));
+                CreateSenses(xmlEntry, expandedNamesToAbbrevationsMapping));
         }
 
-        private IReadOnlyCollection<JMDictSense> CreateSenses(JdicEntry xmlEntry)
+        private IReadOnlyCollection<JMDictSense> CreateSenses(JdicEntry xmlEntry, IReadOnlyDictionary<string, string> expandedNamesToAbbrevationsMapping)
         {
             var sense = new List<JMDictSense>();
             string[] partOfSpeech = Array.Empty<string>();
@@ -235,21 +285,25 @@ namespace JDict
                 if (s.PartOfSpeech.Length > 0)
                 {
                     partOfSpeech = s.PartOfSpeech;
-                    typedPartOfSpeech = partOfSpeech.Select(posStr => EdictTypeUtils.FromDescription(posStr).ValueOr(() =>
+                    typedPartOfSpeech = partOfSpeech.Select(posStr =>
                     {
-                        Debug.WriteLine($"{posStr} unknown");
-                        return default(EdictPartOfSpeech);
-                    })).ToList();
+                        var unexpandedName = expandedNamesToAbbrevationsMapping[posStr];
+                        return EdictTypeUtils.FromAbbrevation(unexpandedName).ValueOr(() =>
+                        {
+                            Debug.WriteLine($"{posStr} unknown");
+                            return default(EdictPartOfSpeech);
+                        });
+                    }).ToList();
                 }
 
                 sense.Add(new JMDictSense(
-                    partOfSpeech.Select(EdictTypeUtils.FromDescription).FirstOrNone().Flatten(),
+                    partOfSpeech.Select(pos => EdictTypeUtils.FromAbbrevation(expandedNamesToAbbrevationsMapping[pos])).FirstOrNone().Flatten(),
                     typedPartOfSpeech,
-                    s.Dialect.Select(EdictDialectUtils.FromDescription).Values().ToList(),
+                    s.Dialect.Select(d => EdictDialectUtils.FromAbbrevation(expandedNamesToAbbrevationsMapping[d])).Values().ToList(),
                     s.Glosses.Select(g => g.Text.Trim()).ToList(),
                     s.Information.ToList(),
-                    s.Field.Select(EdictFieldUtils.FromDescription).Values().ToList(),
-                    s.Misc.Select(EdictMiscUtils.FromDescription).Values().ToList()));
+                    s.Field.Select(f => EdictFieldUtils.FromAbbrevation(expandedNamesToAbbrevationsMapping[f])).Values().ToList(),
+                    s.Misc.Select(m => EdictMiscUtils.FromAbbrevation(expandedNamesToAbbrevationsMapping[m])).Values().ToList()));
             }
 
             return sense;
@@ -359,6 +413,43 @@ namespace JDict
         {
             db.Dispose();
         }
+
+        private string FriendlyDescriptionOf(string abbr)
+        {
+            var res = this.friendlyNames.BinarySearch(
+                abbr,
+                kvp => kvp.Key,
+                StringComparer.Ordinal);
+            if (res.id == -1)
+            {
+                throw new InvalidDataException();
+            }
+            else
+            {
+                return res.element.Value;
+            }
+        }
+
+        public string FriendlyDescriptionof(EdictPartOfSpeech pos)
+        {
+            return FriendlyDescriptionOf(pos.ToAbbrevation());
+        }
+        
+        public string FriendlyDescriptionof(EdictDialect pos)
+        {
+            return FriendlyDescriptionOf(pos.ToAbbrevation());
+        }
+        
+        public string FriendlyDescriptionof(EdictField pos)
+        {
+            return FriendlyDescriptionOf(pos.ToAbbrevation());
+        }
+        
+        public string FriendlyDescriptionof(EdictMisc pos)
+        {
+            return FriendlyDescriptionOf(pos.ToAbbrevation());
+        }
+        
     }
 
     public struct PriorityTag
@@ -592,6 +683,18 @@ namespace JDict
         {
             return pos.ToString().Replace("_", "-");
         }
+        
+        public static Option<EdictPartOfSpeech> FromAbbrevation(string d)
+        {
+            if (Enum.TryParse(d.Replace("-", "_"), out EdictPartOfSpeech e))
+            {
+                return e.Some();
+            }
+            else
+            {
+                return Option.None<EdictPartOfSpeech>();
+            }
+        }
 
         private static EnumMapper<EdictPartOfSpeech> mapping = new EnumMapper<EdictPartOfSpeech>();
     }
@@ -783,7 +886,7 @@ namespace JDict
         aux_v,
 
         [Description("copula")]
-        cop_da,
+        cop,
 
         [Description("adjective (keiyoushi)")]
         adj_i,
@@ -872,9 +975,21 @@ namespace JDict
             return mapping.ToLongString(d);
         }
 
-        public static string ToAbbrevation(this EdictPartOfSpeech d)
+        public static string ToAbbrevation(this EdictDialect d)
         {
             return d.ToString().Replace("_", "-");
+        }
+        
+        public static Option<EdictDialect> FromAbbrevation(string d)
+        {
+            if (Enum.TryParse(d.Replace("-", "_"), out EdictDialect e))
+            {
+                return e.Some();
+            }
+            else
+            {
+                return Option.None<EdictDialect>();
+            }
         }
 
         private static EnumMapper<EdictDialect> mapping = new EnumMapper<EdictDialect>();
@@ -989,6 +1104,18 @@ namespace JDict
         {
             return d.ToString().Replace("_", "-");
         }
+        
+        public static Option<EdictField> FromAbbrevation(string d)
+        {
+            if (Enum.TryParse(d.Replace("-", "_"), out EdictField e))
+            {
+                return e.Some();
+            }
+            else
+            {
+                return Option.None<EdictField>();
+            }
+        }
 
         private static EnumMapper<EdictField> mapping = new EnumMapper<EdictField>();
     }
@@ -1069,6 +1196,18 @@ namespace JDict
         public static string ToAbbrevation(this EdictMisc d)
         {
             return d.ToString().Replace("_", "-");
+        }
+        
+        public static Option<EdictMisc> FromAbbrevation(string d)
+        {
+            if (Enum.TryParse(d.Replace("-", "_"), out EdictMisc e))
+            {
+                return e.Some();
+            }
+            else
+            {
+                return Option.None<EdictMisc>();
+            }
         }
 
         private static EnumMapper<EdictMisc> mapping = new EnumMapper<EdictMisc>();
