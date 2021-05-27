@@ -324,6 +324,29 @@ namespace JDict
         organization,
 
         [Description("old or irregular kana form")]
-        ok
+        ok,
+        
+        [Description("character")]
+        @char,
+        [Description("creature")]
+        creat,
+        [Description("deity")]
+        dei,
+        [Description("event")]
+        ev,
+        [Description("fiction")]
+        fict,
+        [Description("legend")]
+        leg,
+        [Description("mythology")]
+        myth,
+        [Description("object")]
+        obj,
+        [Description("other")]
+        oth,
+        [Description("religion")]
+        relig,
+        [Description("service")]
+        serv,
     }
 }
