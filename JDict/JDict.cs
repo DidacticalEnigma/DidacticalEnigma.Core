@@ -1283,6 +1283,8 @@ namespace JDict
         relig,
         [Description("service")]
         serv,
+        [Description("rude or X-rated term (not displayed in educational software)")]
+        X
     }
     
     public static class EdictMiscUtils
@@ -1328,6 +1330,8 @@ namespace JDict
         ok,
         [Description("old or irregular kana form")]
         oik,
+        [Description("word usually written using kanji alone")]
+        uK,
     }
 
     enum EdictKanjiInformation
@@ -1344,16 +1348,4 @@ namespace JDict
         [Description("word containing out-dated kanji")]
         oK,
     }
-
-    /*
-        uncategorized:
-        [Description("rude or X-rated term (not displayed in educational software)")]
-        X,
-        [Description("exclusively kanji")]
-        eK,
-        [Description("exclusively kana")]
-        ek,
-        [Description("word usually written using kanji alone")]
-        uK,
-    */
 }
