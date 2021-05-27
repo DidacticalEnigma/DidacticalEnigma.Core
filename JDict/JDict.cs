@@ -1086,6 +1086,88 @@ namespace JDict
         station,
         [Description("organization name")]
         organization,
+        [Description("agriculture")]
+        agric,
+        [Description("archeology")]
+        archeol,
+        [Description("art, aesthetics")]
+        art,
+        [Description("audiovisual")]
+        audvid,
+        [Description("aviation")]
+        aviat,
+        [Description("biochemistry")]
+        biochem,
+        [Description("clothing")]
+        cloth,
+        [Description("crystallography")]
+        cryst,
+        [Description("ecology")]
+        ecol,
+        [Description("electricity, elec. eng.")]
+        elec,
+        [Description("electronics")]
+        electr,
+        [Description("embryology")]
+        embryo,
+        [Description("entomology")]
+        ent,
+        [Description("fishing")]
+        fish,
+        [Description("gardening, horticulture")]
+        gardn,
+        [Description("genetics")]
+        genet,
+        [Description("geography")]
+        geogr,
+        [Description("go (game)")]
+        go,
+        [Description("golf")]
+        golf,
+        [Description("grammar")]
+        gramm,
+        [Description("Greek mythology")]
+        grmyth,
+        [Description("hanafuda")]
+        hanaf,
+        [Description("horse racing")]
+        horse,
+        [Description("logic")]
+        logic,
+        [Description("mechanical engineering")]
+        mech,
+        [Description("meteorology")]
+        met,
+        [Description("ornithology")]
+        ornith,
+        [Description("paleontology")]
+        paleo,
+        [Description("pathology")]
+        pathol,
+        [Description("pharmacy")]
+        pharm,
+        [Description("philosophy")]
+        phil,
+        [Description("photography")]
+        photo,
+        [Description("physiology")]
+        physiol,
+        [Description("printing")]
+        print,
+        [Description("psychiatry")]
+        psy,
+        [Description("psychology")]
+        psych,
+        [Description("railway")]
+        rail,
+        [Description("statistics")]
+        stat,
+        [Description("telecommunications")]
+        telec,
+        [Description("trademark")]
+        tradem,
+        [Description("video games")]
+        vidg,
     }
     
     public static class EdictFieldUtils
@@ -1179,6 +1261,28 @@ namespace JDict
         vulg,
         [Description("jocular, humorous term")]
         joc,
+        [Description("character")]
+        @char,
+        [Description("creature")]
+        creat,
+        [Description("deity")]
+        dei,
+        [Description("event")]
+        ev,
+        [Description("fiction")]
+        fict,
+        [Description("legend")]
+        leg,
+        [Description("mythology")]
+        myth,
+        [Description("object")]
+        obj,
+        [Description("other")]
+        oth,
+        [Description("religion")]
+        relig,
+        [Description("service")]
+        serv,
     }
     
     public static class EdictMiscUtils
