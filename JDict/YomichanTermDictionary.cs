@@ -211,7 +211,7 @@ namespace JDict
                         return 1;
                     return 2;
                 })
-                .Select(entry => new Entry(entry.Expression, entry.Reading, entry.Glossary))
+                .Select(entry => new Entry(entry.Expression, entry.Reading, entry.Glossary, entry.DefinitionTags))
                 .ToList();
         }
 
@@ -231,22 +231,33 @@ namespace JDict
 
         public class Entry
         {
-            public Entry(string expression, string reading, IEnumerable<string> glossary)
+            public Entry(string expression, string reading, IEnumerable<string> glossary, string definitionTags)
             {
                 Expression = expression ?? throw new ArgumentNullException(nameof(expression));
                 Reading = reading;
+                DefinitionTags = definitionTags ?? throw new ArgumentNullException(nameof(definitionTags));
                 Glossary = glossary?.ToList() ?? throw new ArgumentNullException(nameof(glossary));
             }
 
             public string Expression { get; }
 
             public string Reading { get; }
+            
+            public string DefinitionTags { get; }
 
             public IEnumerable<string> Glossary { get; }
 
             public override string ToString()
             {
-                return Expression + "\n" + Reading + "\n" + string.Join("\n", Glossary) + "\n";
+                return 
+                    string.Join("\n",
+                        new[]
+                        {
+                            Expression,
+                            Reading,
+                            DefinitionTags,
+                            string.Join("\n", Glossary),
+                        }.Where(x => string.IsNullOrEmpty(x)));
             }
         }
     }

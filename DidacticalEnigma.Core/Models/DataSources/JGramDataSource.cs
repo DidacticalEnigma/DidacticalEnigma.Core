@@ -45,7 +45,7 @@ namespace DidacticalEnigma.Core.Models.DataSources
             if(entry.Example != null)
                 text.Add(new Text(entry.Example, fontSize: FontSize.Small));
             yield return new TextParagraph(text);
-            yield return new LinkParagraph(new Uri("http://www.jgram.org/pages/viewOne.php?id=" + entry.Id), "more info");
+            yield return new LinkParagraph(new Uri("https://takoboto.jp/bunpo/" + entry.Id), "more info");
         }
 
         public void Dispose()
