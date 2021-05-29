@@ -24,6 +24,12 @@ namespace JDict
         private IReadOnlyDiskArray<KeyValuePair<string, IReadOnlyList<long>>> index;
 
         private static readonly Regex termMatcher = new Regex(@"^term_bank_\d+.json$");
+        
+        private static readonly Regex tagMatcher = new Regex(@"^tag_bank_\d+.json$");
+        
+        private static readonly Regex kanjiMatcher = new Regex(@"^kanji_bank_\d+.json$");
+        
+        private static readonly Regex termMetaMatcher = new Regex(@"^term_meta_bank_\d+.json$");
 
         private YomichanDictionaryVersion version;
 
