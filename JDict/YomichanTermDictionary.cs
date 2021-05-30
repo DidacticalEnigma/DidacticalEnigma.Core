@@ -257,7 +257,7 @@ namespace JDict
                             Reading,
                             DefinitionTags,
                             string.Join("\n", Glossary),
-                        }.Where(x => string.IsNullOrEmpty(x)));
+                        }.Where(x => !string.IsNullOrEmpty(x)));
             }
         }
     }
