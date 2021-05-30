@@ -5,7 +5,6 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Xml;
 using System.Xml.Serialization;
 using JDict.Xml;
 using Optional;
@@ -16,11 +15,11 @@ using Utility.Utils;
 
 namespace JDict
 {
-    public class Jnedict : IDisposable
+    public class JMNedictLookup : IDisposable
     {
         private static readonly XmlSerializer serializer = new XmlSerializer(typeof(NeEntry));
 
-        private static readonly Guid Version = new Guid("69868AEF-829D-4BE5-98A5-2FF9FF2D63EB");
+        private static readonly Guid Version = new Guid("B3DC1BEF-3342-4CD0-A87F-763D42FCCEBF");
 
         private Database database;
         private IReadOnlyDiskArray<JnedictEntry> entries;
@@ -31,19 +30,19 @@ namespace JDict
             database.Dispose();
         }
 
-        private Jnedict Init(Stream stream, string cache)
+        private JMNedictLookup Init(Stream stream, string cache)
         {
             var entrySerializer = Serializer.ForComposite()
                 .With(Serializer.ForLong())
                 .With(Serializer.ForReadOnlyList(Serializer.ForStringAsUTF8()))
                 .With(Serializer.ForReadOnlyList(Serializer.ForStringAsUTF8()))
                 .With(Serializer.ForReadOnlyList(Serializer.ForComposite()
-                    .With(Serializer.ForReadOnlyList(Serializer.ForEnum<JnedictType>()))
+                    .With(Serializer.ForReadOnlyList(Serializer.ForEnum<JMNedictType>()))
                     .With(Serializer.ForReadOnlyList(Serializer.ForStringAsUTF8()))
                     .Create()
                     .Mapping(
                         raw => new JnedictTranslation(
-                            (IEnumerable<JnedictType>)raw[0],
+                            (IEnumerable<JMNedictType>)raw[0],
                             (IEnumerable<string>)raw[1]),
                         obj => new object[]
                             {
@@ -65,49 +64,39 @@ namespace JDict
                         obj.Translation
                     });
 
-
-            database = Database.CreateOrOpen(cache, Version)
-                .AddIndirectArray(
-                    entrySerializer,
-                    db => ReadFromXml(stream)
-                        .Select(xmlEntry =>
-                            new JnedictEntry(
-                                xmlEntry.SequenceNumber,
-                                (xmlEntry.KanjiElements ?? Array.Empty<KanjiElement>()).Select(k => k.Key),
-                                (xmlEntry.ReadingElements ?? Array.Empty<ReadingElement>()).Select(r => r.Reb),
-                                (xmlEntry.TranslationalEquivalents ?? Array.Empty<NeTranslationalEquivalent>()).Select(tr =>
-                                    new JnedictTranslation(
-                                        (tr.Types ?? Array.Empty<string>())
-                                        .Select(t => JnedictTypeUtils.FromDescription(t))
-                                        .Values(),
-                                        (tr.Translation ?? Array.Empty<NeTranslation>())
-                                        .Where(t => t.Lang == null || t.Lang == "eng")
-                                        .Select(t => t.Text))))),
-                    x => x.SequenceNumber)
-                .AddIndirectArray(Serializer.ForKeyValuePair(Serializer.ForStringAsUTF8(), Serializer.ForReadOnlyList(Serializer.ForLong())), db =>
-                    {
-                        IEnumerable<KeyValuePair<long, string>> It(IEnumerable<JnedictEntry> entries)
+            using (var parser = JMNedictParser.Create(stream))
+            {
+                database = Database.CreateOrOpen(cache, Version)
+                    .AddIndirectArray(
+                        entrySerializer,
+                        db => parser.ReadRemainingToEnd())
+                    .AddIndirectArray(
+                        Serializer.ForKeyValuePair(Serializer.ForStringAsUTF8(),
+                            Serializer.ForReadOnlyList(Serializer.ForLong())), db =>
                         {
-                            foreach (var e in entries)
+                            IEnumerable<KeyValuePair<long, string>> It(IEnumerable<JnedictEntry> entries)
                             {
-                                foreach (var r in e.Reading)
+                                foreach (var e in entries)
                                 {
-                                    yield return new KeyValuePair<long, string>(e.SequenceNumber, r);
-                                }
+                                    foreach (var r in e.Reading)
+                                    {
+                                        yield return new KeyValuePair<long, string>(e.SequenceNumber, r);
+                                    }
 
-                                foreach (var k in e.Kanji)
-                                {
-                                    yield return new KeyValuePair<long, string>(e.SequenceNumber, k);
+                                    foreach (var k in e.Kanji)
+                                    {
+                                        yield return new KeyValuePair<long, string>(e.SequenceNumber, k);
+                                    }
                                 }
                             }
-                        }
 
-                        return It(db.Get<JnedictEntry>(0).LinearScan())
-                            .GroupBy(kvp => kvp.Value, kvp => kvp.Key)
-                            .Select(x => new KeyValuePair<string, IReadOnlyList<long>>(x.Key, x.ToList()));
-                    },
-                    x => x.Key, StringComparer.Ordinal)
-                .Build();
+                            return It(db.Get<JnedictEntry>(0).LinearScan())
+                                .GroupBy(kvp => kvp.Value, kvp => kvp.Key)
+                                .Select(x => new KeyValuePair<string, IReadOnlyList<long>>(x.Key, x.ToList()));
+                        },
+                        x => x.Key, StringComparer.Ordinal)
+                    .Build();
+            }
 
             entries = database.Get<JnedictEntry>(0, new LruCache<long, JnedictEntry>(64));
             kvps = database.Get<KeyValuePair<string, IReadOnlyList<long>>>(1, new LruCache<long, KeyValuePair<string, IReadOnlyList<long>>>(64));
@@ -139,48 +128,14 @@ namespace JDict
             }
         }
 
-        private IEnumerable<NeEntry> ReadFromXml(Stream stream)
-        {
-            var xmlSettings = new XmlReaderSettings
-            {
-                CloseInput = false,
-                DtdProcessing = DtdProcessing.Parse, // we have local entities
-                XmlResolver = null, // we don't want to resolve against external entities
-                MaxCharactersFromEntities = 128 * 1024 * 1024 / 2, // 128 MB
-                MaxCharactersInDocument = 512 * 1024 * 1024 / 2 // 512 MB
-            };
-            using (var xmlReader = XmlReader.Create(stream, xmlSettings))
-            {
-                while (xmlReader.Read())
-                {
-                    if (xmlReader.NodeType == XmlNodeType.Element && xmlReader.Name == "JMnedict")
-                    {
-                        while (xmlReader.Read())
-                        {
-                            if (xmlReader.NodeType == XmlNodeType.Element && xmlReader.Name == "entry")
-                            {
-                                using (
-                                    var elementReader =
-                                        new StringReader(xmlReader.ReadOuterXml()))
-                                {
-                                    var entry = (NeEntry)serializer.Deserialize(elementReader);
-                                    yield return entry;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        private async Task<Jnedict> InitAsync(Stream stream, string cache)
+        private async Task<JMNedictLookup> InitAsync(Stream stream, string cache)
         {
             // TODO: not a lazy way
             await Task.Run(() => Init(stream, cache));
             return this;
         }
 
-        private async Task<Jnedict> InitAsync(string path, string cache)
+        private async Task<JMNedictLookup> InitAsync(string path, string cache)
         {
             using (var file = File.OpenRead(path))
             using (var gzip = new GZipStream(file, CompressionMode.Decompress))
@@ -189,7 +144,7 @@ namespace JDict
             }
         }
 
-        private Jnedict Init(string path, string cache)
+        private JMNedictLookup Init(string path, string cache)
         {
             using (var file = File.OpenRead(path))
             using (var gzip = new GZipStream(file, CompressionMode.Decompress))
@@ -198,35 +153,35 @@ namespace JDict
             }
         }
 
-        private Jnedict()
+        private JMNedictLookup()
         {
 
         }
 
-        public static Jnedict Create(string path, string cache)
+        public static JMNedictLookup Create(string path, string cache)
         {
-            return new Jnedict().Init(
+            return new JMNedictLookup().Init(
                 path,
                 cache);
         }
 
-        public static Jnedict Create(Stream stream, string cache)
+        public static JMNedictLookup Create(Stream stream, string cache)
         {
-            return new Jnedict().Init(
+            return new JMNedictLookup().Init(
                 stream,
                 cache);
         }
 
-        public static async Task<Jnedict> CreateAsync(string path, string cache)
+        public static async Task<JMNedictLookup> CreateAsync(string path, string cache)
         {
-            return await new Jnedict().InitAsync(
+            return await new JMNedictLookup().InitAsync(
                 path,
                 cache);
         }
 
-        public static async Task<Jnedict> CreateAsync(Stream stream, string cache)
+        public static async Task<JMNedictLookup> CreateAsync(Stream stream, string cache)
         {
-            return await new Jnedict().InitAsync(
+            return await new JMNedictLookup().InitAsync(
                 stream,
                 cache);
         }
@@ -257,12 +212,12 @@ namespace JDict
 
     public class JnedictTranslation
     {
-        public IEnumerable<JnedictType> Type { get; }
+        public IEnumerable<JMNedictType> Type { get; }
 
         public IEnumerable<string> Translation { get; }
 
         public JnedictTranslation(
-            IEnumerable<JnedictType> type,
+            IEnumerable<JMNedictType> type,
             IEnumerable<string> translation)
         {
             Type = type.ToList();
@@ -272,20 +227,37 @@ namespace JDict
 
     public static class JnedictTypeUtils
     {
-        public static Option<JnedictType> FromDescription(string description)
+        public static Option<JMNedictType> FromDescription(string description)
         {
             return mapping.FromDescription(description);
         }
 
-        public static string ToLongString(this JnedictType value)
+        public static string ToLongString(this JMNedictType value)
         {
             return mapping.ToLongString(value);
         }
+        
+        public static string ToAbbrevation(this JMNedictType d)
+        {
+            return d.ToString().Replace("_", "-");
+        }
+        
+        public static Option<JMNedictType> FromAbbrevation(string d)
+        {
+            if (Enum.TryParse(d.Replace("-", "_"), out JMNedictType e))
+            {
+                return e.Some();
+            }
+            else
+            {
+                return Option.None<JMNedictType>();
+            }
+        }
 
-        private static EnumMapper<JnedictType> mapping = new EnumMapper<JnedictType>();
+        private static EnumMapper<JMNedictType> mapping = new EnumMapper<JMNedictType>();
     }
 
-    public enum JnedictType
+    public enum JMNedictType
     {
         [Description("family or surname")]
         surname,

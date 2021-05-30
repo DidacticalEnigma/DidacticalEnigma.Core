@@ -10,7 +10,7 @@ namespace DidacticalEnigma.Core.Models.DataSources
 {
     public class JNeDictDataSource : IDataSource
     {
-        private readonly Jnedict dict;
+        private readonly JMNedictLookup dict;
 
         public static DataSourceDescriptor Descriptor { get; } = new DataSourceDescriptor(
             new Guid("12808B42-047E-4711-84A3-7699F74F7E5B"),
@@ -58,7 +58,7 @@ namespace DidacticalEnigma.Core.Models.DataSources
             return Task.FromResult(UpdateResult.NotSupported);
         }
 
-        public JNeDictDataSource(Jnedict dict)
+        public JNeDictDataSource(JMNedictLookup dict)
         {
             this.dict = dict;
         }

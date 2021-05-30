@@ -8,7 +8,7 @@ using System.Text;
 
 namespace JDict
 {
-    public class JESC
+    public class JESC : ICorpus
     {
         private IEnumerable<SentencePair> Sentences(Func<string, TextReader> readerFactory)
         {

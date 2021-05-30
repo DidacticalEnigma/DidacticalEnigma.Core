@@ -71,7 +71,7 @@ namespace DidacticalEnigma.Core.Models.DataSources
                 {
                     foreach (var sense in entry.Senses)
                     {
-                        l.Add(new Text(string.Join("/", sense.PartOfSpeechInfo.Select(pos => jdict.FriendlyDescriptionof(pos))), fontSize: FontSize.ExtraSmall));
+                        l.Add(new Text(string.Join("/", sense.PartOfSpeechInfo.Select(pos => jdict.FriendlyDescriptionOf(pos))), fontSize: FontSize.ExtraSmall));
                         l.Add(new Text("\n"));
                         {
                             bool first = true;
@@ -80,7 +80,7 @@ namespace DidacticalEnigma.Core.Models.DataSources
                                 if(!first)
                                     l.Add(new Text(", ", fontSize: FontSize.Medium));
                                 first = false;
-                                l.Add(new Text(jdict.FriendlyDescriptionof(dialect), fontSize: FontSize.Medium));
+                                l.Add(new Text(jdict.FriendlyDescriptionOf(dialect), fontSize: FontSize.Medium));
                             }
                             if(!first)
                                 l.Add(new Text("\n"));
@@ -92,7 +92,7 @@ namespace DidacticalEnigma.Core.Models.DataSources
                                 if(!first)
                                     l.Add(new Text(", ", fontSize: FontSize.Medium));
                                 first = false;
-                                l.Add(new Text(jdict.FriendlyDescriptionof(field), fontSize: FontSize.Medium));
+                                l.Add(new Text(jdict.FriendlyDescriptionOf(field), fontSize: FontSize.Medium));
                             }
                             if(!first)
                                 l.Add(new Text("\n"));
@@ -104,7 +104,7 @@ namespace DidacticalEnigma.Core.Models.DataSources
                                 if(!first)
                                     l.Add(new Text(", ", fontSize: FontSize.Medium));
                                 first = false;
-                                l.Add(new Text(jdict.FriendlyDescriptionof(misc), fontSize: FontSize.Medium));
+                                l.Add(new Text(jdict.FriendlyDescriptionOf(misc), fontSize: FontSize.Medium));
                             }
                             if(!first)
                                 l.Add(new Text("\n"));
