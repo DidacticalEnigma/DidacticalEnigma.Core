@@ -1,16 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using JDict.Xml;
-using Optional;
 using Optional.Collections;
 using TinyIndex;
-using Utility.Utils;
+
 // ReSharper disable InconsistentNaming
 
 namespace JDict
@@ -185,140 +183,5 @@ namespace JDict
                 stream,
                 cache);
         }
-    }
-
-    public class JnedictEntry
-    {
-        public long SequenceNumber { get; }
-
-        public IEnumerable<string> Kanji { get; }
-
-        public IEnumerable<string> Reading { get; }
-
-        public IEnumerable<JnedictTranslation> Translation { get; }
-
-        public JnedictEntry(
-            long sequenceNumber,
-            IEnumerable<string> kanji,
-            IEnumerable<string> reading,
-            IEnumerable<JnedictTranslation> translation)
-        {
-            SequenceNumber = sequenceNumber;
-            Kanji = kanji.ToList();
-            Reading = reading.ToList();
-            Translation = translation.ToList();
-        }
-    }
-
-    public class JnedictTranslation
-    {
-        public IEnumerable<JMNedictType> Type { get; }
-
-        public IEnumerable<string> Translation { get; }
-
-        public JnedictTranslation(
-            IEnumerable<JMNedictType> type,
-            IEnumerable<string> translation)
-        {
-            Type = type.ToList();
-            Translation = translation.ToList();
-        }
-    }
-
-    public static class JnedictTypeUtils
-    {
-        public static Option<JMNedictType> FromDescription(string description)
-        {
-            return mapping.FromDescription(description);
-        }
-
-        public static string ToLongString(this JMNedictType value)
-        {
-            return mapping.ToLongString(value);
-        }
-        
-        public static string ToAbbrevation(this JMNedictType d)
-        {
-            return d.ToString().Replace("_", "-");
-        }
-        
-        public static Option<JMNedictType> FromAbbrevation(string d)
-        {
-            if (Enum.TryParse(d.Replace("-", "_"), out JMNedictType e))
-            {
-                return e.Some();
-            }
-            else
-            {
-                return Option.None<JMNedictType>();
-            }
-        }
-
-        private static EnumMapper<JMNedictType> mapping = new EnumMapper<JMNedictType>();
-    }
-
-    public enum JMNedictType
-    {
-        [Description("family or surname")]
-        surname,
-
-        [Description("place name")]
-        place,
-
-        [Description("unclassified name")]
-        unclass,
-
-        [Description("company name")]
-        company,
-
-        [Description("product name")]
-        product,
-
-        [Description("work of art, literature, music, etc. name")]
-        work,
-
-        [Description("male given name or forename")]
-        masc,
-
-        [Description("female given name or forename")]
-        fem,
-
-        [Description("full name of a particular person")]
-        person,
-
-        [Description("given name or forename, gender not specified")]
-        given,
-
-        [Description("railway station")]
-        station,
-
-        [Description("organization name")]
-        organization,
-
-        [Description("old or irregular kana form")]
-        ok,
-        
-        [Description("character")]
-        @char,
-        [Description("creature")]
-        creat,
-        [Description("deity")]
-        dei,
-        [Description("event")]
-        ev,
-        [Description("fiction")]
-        fict,
-        [Description("legend")]
-        leg,
-        [Description("mythology")]
-        myth,
-        [Description("object")]
-        obj,
-        [Description("other")]
-        oth,
-        [Description("religion")]
-        relig,
-        [Description("service")]
-        serv,
     }
 }
