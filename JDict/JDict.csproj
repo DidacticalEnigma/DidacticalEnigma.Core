@@ -29,9 +29,4 @@
     <ProjectReference Include="..\Utility\Utility.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Db" />
-    <Folder Include="Json" />
-  </ItemGroup>
-
 </Project>
