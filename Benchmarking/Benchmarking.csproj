@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <OutputType>Exe</OutputType>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="BenchmarkDotNet" Version="0.13.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\AutomatedTests.NetCore\AutomatedTests.NetCore.csproj" />
+      <ProjectReference Include="..\DidacticalEnigma.Core\DidacticalEnigma.Core.csproj" />
+    </ItemGroup>
+
+</Project>

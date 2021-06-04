@@ -3,7 +3,7 @@ using System.IO;
 
 namespace AutomatedTests
 {
-    class TestDataPaths
+    public class TestDataPaths
     {
         // FIX THIS PATH SO IT POINTS TO THE ACTUAL DIRECTORY YOUR DATA IS
         // Various test runners put the executables in unrelated places,
