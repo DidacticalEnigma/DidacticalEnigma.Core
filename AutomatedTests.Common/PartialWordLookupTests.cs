@@ -27,6 +27,15 @@ namespace AutomatedTests
             var partial = kernel.Get<PartialWordLookup>();
             var entries = partial.LookupWords("*く太陽!").ToList();
         }
+        
+        [Explicit]
+        [Test]
+        public void U()
+        {
+            var kernel = Configure(TestDataPaths.BaseDir);
+            var partial = kernel.Get<PartialWordLookup>();
+            Assert.IsFalse(partial.LookupWords("*").Any());
+        }
 
         public static Kernel Configure(string dataDir)
         {

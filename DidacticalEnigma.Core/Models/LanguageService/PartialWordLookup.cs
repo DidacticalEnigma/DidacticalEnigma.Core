@@ -36,6 +36,11 @@ namespace DidacticalEnigma.Core.Models.LanguageService
         public IEnumerable<string> LookupWords(string input)
         {
             var escaped = Regex.Escape(start + input + end);
+            if (PatternMatchesEveryWord(input))
+            {
+                return Enumerable.Empty<string>();
+            }
+            
             var groupsReplaced = groupMatcher.Replace(escaped, match =>
             {
                 var text = match.Groups[1].Value;
@@ -52,6 +57,16 @@ namespace DidacticalEnigma.Core.Models.LanguageService
                 .Cast<Match>()
                 .Select(m => m.Value.TrimStart(startArr).TrimEnd(endArr))
                 .ToList();
+        }
+
+        private bool PatternMatchesEveryWord(string input)
+        {
+            return input
+                .Replace(@"?", "")
+                .Replace(@"？", "")
+                .Replace(@"*", "")
+                .Replace(@"＊", "")
+                .Length == 0;
         }
     }
 }
