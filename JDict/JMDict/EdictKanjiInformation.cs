@@ -15,5 +15,7 @@ namespace JDict
         io,
         [Description("word containing out-dated kanji")]
         oK,
+        [Description("rarely-used kanji form")]
+        rK,
     }
 }

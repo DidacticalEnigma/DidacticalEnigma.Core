@@ -27,5 +27,7 @@ namespace JDict
         hob,
         [Description("Nagano-ben")]
         nab,
+        [Description("Brazilian")]
+        bra,
     }
 }

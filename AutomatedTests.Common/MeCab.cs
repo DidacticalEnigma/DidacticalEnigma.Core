@@ -96,6 +96,7 @@ namespace AutomatedTests
         };
 
         [TestCaseSource(nameof(Test))]
+        [Test]
         public void BasicCompatibility(string sentence, IEnumerable<IEntry> expectedEntries)
         {
             var ipadicEntries = ipadicMecab.ParseToEntries(sentence).Where(e => e.IsRegular);
@@ -111,6 +112,20 @@ namespace AutomatedTests
                 Assert.AreEqual(e.Reading, i.Reading);
                 Assert.AreEqual(e.DictionaryForm, i.DictionaryForm);
             }
+        }
+        
+        [Explicit]
+        [Test]
+        public void Unidic()
+        {
+            string sentence = "これは俺";
+            var unidic = new MeCabUnidic(new MeCabParam
+            {
+                DicDir = TestDataPaths.Unidic,
+                UseMemoryMappedFile = true
+            });
+            var entries = unidic.ParseToEntries(sentence).Where(e => e.IsRegular).ToList();
+            ;
         }
 
         private static IMorphologicalAnalyzer<IEntry> ipadicMecab;

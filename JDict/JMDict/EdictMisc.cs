@@ -84,6 +84,12 @@ namespace JDict
         [Description("service")]
         serv,
         [Description("rude or X-rated term (not displayed in educational software)")]
-        X
+        X,
+        [Description("document")]
+        doc,
+        [Description("formal or literary term")]
+        form,
+        [Description("group")]
+        group,
     }
 }

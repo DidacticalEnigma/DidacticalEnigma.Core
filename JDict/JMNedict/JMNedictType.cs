@@ -65,5 +65,9 @@ namespace JDict
         relig,
         [Description("service")]
         serv,
+        [Description("document")]
+        doc,
+        [Description("group")]
+        group,
     }
 }

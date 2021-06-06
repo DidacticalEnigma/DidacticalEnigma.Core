@@ -20,12 +20,15 @@ namespace DidacticalEnigma.Core.Models.LanguageService
                 .Map(f => StringExt.SplitWithQuotes(f, ',', '"').ToArray())
                 .ValueOr(Array.Empty<string>());
 
-            PartOfSpeech = MeCabEntryParser.PartOfSpeechFromString(MeCabEntryParser.OrNull(features, 0));
-            ConjugatedForm = MeCabEntryParser.OrNull(features, 5);
-            DictionaryForm = MeCabEntryParser.OrNull(features,　10);
-            Pronunciation = MeCabEntryParser.OrNull(features, 9);
-            Reading = MeCabEntryParser.OrNull(features, 17);
+            PartOfSpeech = MeCabEntryParser.PartOfSpeechFromString(MeCabEntryParser.OrNull(features, 0)); // f[0]:  pos1
+            ConjugatedForm = MeCabEntryParser.OrNull(features, 5); // ; f[5]:  cForm
+            DictionaryForm = MeCabEntryParser.OrNull(features,　10); // ; f[10]: orthBase
+            Pronunciation = MeCabEntryParser.OrNull(features, 9); // ; f[9]:  pron
+            Reading = MeCabEntryParser.OrNull(features, 17); // ; f[17]: kana
             Type = MeCabEntryParser.TypeFromString(ConjugatedForm);
+            // ; f[1]:  pos2
+            // ; f[2]:  pos3
+            // ; f[3]:  pos4
             PartOfSpeechSections = features
                 .Skip(1)
                 .Take(3)
