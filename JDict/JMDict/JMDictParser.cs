@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Xml;
 using System.Xml.Serialization;
 using JDict.Xml;
+using Optional;
+using Optional.Collections;
 using Utility.Utils;
 
 namespace JDict
@@ -25,12 +28,17 @@ namespace JDict
         };
 
         private XmlReader xmlReader;
-        
+
         public DateTime? Version { get; private set; }
         
         public IReadOnlyDualDictionary<string, string> FriendlyNames { get; private set; }
+
+        public JMDictEntry Read()
+        {
+            return CreateEntry(ReadRaw(), FriendlyNames.Inverse);
+        }
         
-        public JdicEntry Read()
+        private JdicEntry ReadRaw()
         {
             while (xmlReader.Read())
             {
@@ -81,10 +89,53 @@ namespace JDict
             
             return null;
         }
-
-        public IEnumerable<JdicEntry> ReadRemainingToEnd()
+        
+        private JMDictEntry CreateEntry(JdicEntry xmlEntry, IReadOnlyDictionary<string, string> expandedNamesToAbbrevationsMapping)
         {
-            JdicEntry entry;
+            return new JMDictEntry(
+                xmlEntry.Number,
+                xmlEntry.ReadingElements.Select(r => r.Reb).ToList(),
+                xmlEntry.KanjiElements.Select(k => k.Key).ToList(),
+                CreateSenses(xmlEntry, expandedNamesToAbbrevationsMapping));
+        }
+
+        private IReadOnlyCollection<JMDictSense> CreateSenses(JdicEntry xmlEntry, IReadOnlyDictionary<string, string> expandedNamesToAbbrevationsMapping)
+        {
+            var sense = new List<JMDictSense>();
+            string[] partOfSpeech = Array.Empty<string>();
+            var typedPartOfSpeech = new List<EdictPartOfSpeech>();
+            foreach (var s in xmlEntry.Senses)
+            {
+                if (s.PartOfSpeech.Length > 0)
+                {
+                    partOfSpeech = s.PartOfSpeech;
+                    typedPartOfSpeech = partOfSpeech.Select(posStr =>
+                    {
+                        var unexpandedName = expandedNamesToAbbrevationsMapping[posStr];
+                        return EdictTypeUtils.FromAbbrevation(unexpandedName).ValueOr(() =>
+                        {
+                            Debug.WriteLine($"{posStr} unknown");
+                            return default(EdictPartOfSpeech);
+                        });
+                    }).ToList();
+                }
+
+                sense.Add(new JMDictSense(
+                    partOfSpeech.Select(pos => EdictTypeUtils.FromAbbrevation(expandedNamesToAbbrevationsMapping[pos])).FirstOrNone().Flatten(),
+                    typedPartOfSpeech,
+                    s.Dialect.Select(d => EdictDialectUtils.FromAbbrevation(expandedNamesToAbbrevationsMapping[d])).Values().ToList(),
+                    s.Glosses.Select(g => g.Text.Trim()).ToList(),
+                    s.Information.ToList(),
+                    s.Field.Select(f => EdictFieldUtils.FromAbbrevation(expandedNamesToAbbrevationsMapping[f])).Values().ToList(),
+                    s.Misc.Select(m => EdictMiscUtils.FromAbbrevation(expandedNamesToAbbrevationsMapping[m])).Values().ToList()));
+            }
+
+            return sense;
+        }
+
+        public IEnumerable<JMDictEntry> ReadRemainingToEnd()
+        {
+            JMDictEntry entry;
             while ((entry = this.Read()) != null)
             {
                 yield return entry;
