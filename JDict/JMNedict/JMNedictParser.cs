@@ -24,14 +24,7 @@ namespace JDict
         public static JMNedictParser Create(Stream stream)
         {
             var friendlyNames = new DualDictionary<string, string>();
-
-            var xmlSettings = new XmlReaderSettings
-            {
-                CloseInput = true,
-                DtdProcessing = DtdProcessing.Parse, // we have local entities
-                XmlResolver = null, // we don't want to resolve against external entities
-                MaxCharactersInDocument = 512 * 1024 * 1024 / 2 // 512 MB,
-            };
+            
             var xmlReader = new XmlTextReader(stream);
             xmlReader.EntityHandling = EntityHandling.ExpandCharEntities;
             xmlReader.DtdProcessing = DtdProcessing.Ignore;
