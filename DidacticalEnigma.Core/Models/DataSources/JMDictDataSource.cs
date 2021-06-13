@@ -7,6 +7,7 @@ using DidacticalEnigma.Core.Models.Formatting;
 using DidacticalEnigma.Core.Models.LanguageService;
 using JDict;
 using Optional;
+using Utility.Utils;
 
 namespace DidacticalEnigma.Core.Models.DataSources
 {
@@ -52,6 +53,16 @@ namespace DidacticalEnigma.Core.Models.DataSources
                             l.Add(new Text(";  "));
                         first = false;
                         l.Add(new Text(kanji.Kanji));
+                        var infoList = kanji.Informational.Materialize();
+                        if (infoList.Count != 0)
+                        {
+                            l.Add(new Text("(", fontSize: FontSize.Small));
+                            foreach (var information in infoList)
+                            {
+                                l.Add(new Text(jdict.FriendlyDescriptionOf(information), fontSize: FontSize.Small));
+                            }
+                            l.Add(new Text(")", fontSize: FontSize.Small));
+                        }
                     }
 
                     l.Add(new Text("\n"));
@@ -64,6 +75,63 @@ namespace DidacticalEnigma.Core.Models.DataSources
                             l.Add(new Text("\n"));
                         first = false;
                         l.Add(new Text(reading.Reading));
+                        var infoList = reading.ReadingInformation.Materialize();
+                        var validForList = reading.ValidReadingFor.Materialize();
+                        var notATrueReading = reading.NotATrueReading;
+                        if (notATrueReading || infoList.Count != 0 || validForList.Count != 0)
+                        {
+                            l.Add(new Text("(", fontSize: FontSize.Small));
+                        }
+
+                        if (notATrueReading)
+                        {
+                            l.Add(new Text("not a true reading", fontSize: FontSize.Small));
+                        }
+
+                        if (infoList.Count != 0)
+                        {
+                            if (notATrueReading)
+                            {
+                                l.Add(new Text(", ", fontSize: FontSize.Small));                                
+                            }
+                            bool f = false;
+                            foreach (var information in infoList)
+                            {
+                                if (!f)
+                                {
+                                    l.Add(new Text(", "));
+                                }
+
+                                l.Add(new Text(jdict.FriendlyDescriptionOf(information), fontSize: FontSize.Small));
+                                f = true;
+                            }
+                        }
+                        
+                        if(validForList.Count != 0)
+                        {
+                            if (notATrueReading || infoList.Count != 0)
+                            {
+                                l.Add(new Text(", ", fontSize: FontSize.Small));
+                            }
+                            
+                            l.Add(new Text("only applicable to:", fontSize: FontSize.Small));
+                            bool f = false;
+                            foreach (var validReading in validForList)
+                            {
+                                if (!f)
+                                {
+                                    l.Add(new Text(", "));
+                                }
+
+                                l.Add(new Text(validReading, fontSize: FontSize.Small));
+                                f = true;
+                            }
+                        }
+
+                        if (notATrueReading || infoList.Count != 0 || validForList.Count != 0)
+                        {
+                            l.Add(new Text(")", fontSize: FontSize.Small));
+                        }
                     }
 
                     l.Add(new Text("\n"));

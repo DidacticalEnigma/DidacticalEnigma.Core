@@ -300,5 +300,15 @@ namespace JDict
             return FriendlyDescriptionOf(pos.ToAbbrevation());
         }
         
+        public string FriendlyDescriptionOf(EdictKanjiInformation pos)
+        {
+            return FriendlyDescriptionOf(pos.ToString());
+        }
+        
+        public string FriendlyDescriptionOf(EdictReadingInformation pos)
+        {
+            return FriendlyDescriptionOf(pos.ToString());
+        }
+        
     }
 }
