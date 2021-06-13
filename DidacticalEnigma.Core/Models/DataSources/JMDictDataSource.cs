@@ -80,7 +80,7 @@ namespace DidacticalEnigma.Core.Models.DataSources
                         var notATrueReading = reading.NotATrueReading;
                         if (notATrueReading || infoList.Count != 0 || validForList.Count != 0)
                         {
-                            l.Add(new Text("(", fontSize: FontSize.Small));
+                            l.Add(new Text(" (", fontSize: FontSize.Small));
                         }
 
                         if (notATrueReading)
@@ -94,7 +94,7 @@ namespace DidacticalEnigma.Core.Models.DataSources
                             {
                                 l.Add(new Text(", ", fontSize: FontSize.Small));                                
                             }
-                            bool f = false;
+                            bool f = true;
                             foreach (var information in infoList)
                             {
                                 if (!f)
@@ -103,7 +103,7 @@ namespace DidacticalEnigma.Core.Models.DataSources
                                 }
 
                                 l.Add(new Text(jdict.FriendlyDescriptionOf(information), fontSize: FontSize.Small));
-                                f = true;
+                                f = false;
                             }
                         }
                         
@@ -115,7 +115,7 @@ namespace DidacticalEnigma.Core.Models.DataSources
                             }
                             
                             l.Add(new Text("only applicable to:", fontSize: FontSize.Small));
-                            bool f = false;
+                            bool f = true;
                             foreach (var validReading in validForList)
                             {
                                 if (!f)
@@ -124,7 +124,7 @@ namespace DidacticalEnigma.Core.Models.DataSources
                                 }
 
                                 l.Add(new Text(validReading, fontSize: FontSize.Small));
-                                f = true;
+                                f = false;
                             }
                         }
 
