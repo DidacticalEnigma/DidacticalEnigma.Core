@@ -56,10 +56,17 @@ namespace DidacticalEnigma.Core.Models.DataSources
                         var infoList = kanji.Informational.Materialize();
                         if (infoList.Count != 0)
                         {
-                            l.Add(new Text("(", fontSize: FontSize.Small));
+                            l.Add(new Text(" (", fontSize: FontSize.Small));
+                            bool f = true;
                             foreach (var information in infoList)
                             {
+                                if (!f)
+                                {
+                                    l.Add(new Text(", "));
+                                }
+                                
                                 l.Add(new Text(jdict.FriendlyDescriptionOf(information), fontSize: FontSize.Small));
+                                f = false;
                             }
                             l.Add(new Text(")", fontSize: FontSize.Small));
                         }
@@ -114,7 +121,7 @@ namespace DidacticalEnigma.Core.Models.DataSources
                                 l.Add(new Text(", ", fontSize: FontSize.Small));
                             }
                             
-                            l.Add(new Text("only applicable to:", fontSize: FontSize.Small));
+                            l.Add(new Text("only applicable to: ", fontSize: FontSize.Small));
                             bool f = true;
                             foreach (var validReading in validForList)
                             {
