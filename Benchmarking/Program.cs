@@ -7,7 +7,7 @@ namespace Benchmarking
     {
         static void Main(string[] args)
         {
-            var summary = BenchmarkRunner.Run<JMNedictParsing>();
+            var summary = BenchmarkRunner.Run<KanjiDicParsing>();
         }
     }
 }
