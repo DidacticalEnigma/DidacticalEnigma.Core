@@ -2,7 +2,7 @@ using System.ComponentModel;
 
 namespace JDict
 {
-    enum EdictKanjiInformation
+    public enum EdictKanjiInformation
     {
         // reserving 0 for an "unknown"
         [Description("ateji (phonetic) reading")]

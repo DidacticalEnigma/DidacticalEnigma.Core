@@ -32,7 +32,7 @@ namespace DidacticalEnigma.Core.Models
                             word.PartOfSpeech,
                             word.DictionaryForm,
                             word.GetPartOfSpeechInfo().Contains(PartOfSpeechInfo.Pronoun) ? Option.Some(EdictPartOfSpeech.pn) : word.Type,
-                            word.Reading ?? lookup.Lookup(word.DictionaryForm ?? word.SurfaceForm)?.FirstOrDefault()?.Readings.First()));
+                            word.Reading ?? lookup.Lookup(word.DictionaryForm ?? word.SurfaceForm)?.FirstOrDefault()?.ReadingEntries.First().Reading));
                 });
         }
     }

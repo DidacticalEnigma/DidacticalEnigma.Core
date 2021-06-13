@@ -28,7 +28,7 @@ namespace DidacticalEnigma.Core.Models.LanguageService
             this.searcher = searcher;
             this.lookup = lookup;
             allWords = string.Join("", jmDictLookup.AllEntries()
-                .SelectMany(entry => entry.Kanji.Concat(entry.Readings))
+                .SelectMany(entry => entry.KanjiEntries.Select(k => k.Kanji).Concat(entry.ReadingEntries.Select(r => r.Reading)))
                 .Distinct()
                 .Select(word => start + word + end));
         }

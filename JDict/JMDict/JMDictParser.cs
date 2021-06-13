@@ -24,8 +24,8 @@ namespace JDict
         public JMDictEntry Read()
         {
             long? sequenceNumber = null;
-            var kanjiElements = new List<string>();
-            var readingElements = new List<string>();
+            var kanjiElements = new List<JMDictKanji>();
+            var readingElements = new List<JMDictReading>();
             var senses = new List<JMDictSense>();
             while (xmlReader.Read())
             {
@@ -495,6 +495,57 @@ namespace JDict
 
             return field;
         }
+        
+        private EdictKanjiInformation? ReadKeInf(int depth, string tag)
+        {
+            EdictKanjiInformation? keInf = null;
+            while (xmlReader.Read())
+            {
+                if (xmlReader.NodeType == XmlNodeType.EndElement && xmlReader.Name == tag && xmlReader.Depth == depth)
+                {
+                    break;
+                }
+
+                if (xmlReader.NodeType == XmlNodeType.EntityReference)
+                {
+                    switch (xmlReader.Name)
+                    {
+                        case "ateji": keInf = EdictKanjiInformation.ateji; break;
+                        case "ik": keInf = EdictKanjiInformation.ik; break;
+                        case "iK": keInf = EdictKanjiInformation.iK; break;
+                        case "io": keInf = EdictKanjiInformation.io; break;
+                        case "oK": keInf = EdictKanjiInformation.oK; break;
+                    }
+                }
+            }
+
+            return keInf;
+        }
+        
+        private EdictReadingInformation? ReadReInf(int depth, string tag)
+        {
+            EdictReadingInformation? reInf = null;
+            while (xmlReader.Read())
+            {
+                if (xmlReader.NodeType == XmlNodeType.EndElement && xmlReader.Name == tag && xmlReader.Depth == depth)
+                {
+                    break;
+                }
+
+                if (xmlReader.NodeType == XmlNodeType.EntityReference)
+                {
+                    switch (xmlReader.Name)
+                    {
+                        case "gikun": reInf = EdictReadingInformation.gikun; break;
+                        case "ik": reInf = EdictReadingInformation.ik; break;
+                        case "ok": reInf = EdictReadingInformation.ok; break;
+                        case "uK": reInf = EdictReadingInformation.uK; break;
+                    }
+                }
+            }
+
+            return reInf;
+        }
 
         private long? ReadEntSeq(int depth, string tag)
         {
@@ -519,9 +570,11 @@ namespace JDict
             return sequenceNumber;
         }
         
-        private string ReadKanjiElement(int depth, string tag)
+        private JMDictKanji ReadKanjiElement(int depth, string tag)
         {
             string kanjiElement = null;
+            var infoList = new List<EdictKanjiInformation>();
+            var priorities = new List<PriorityTag>();
             while (xmlReader.Read())
             {
                 if (xmlReader.NodeType == XmlNodeType.EndElement && xmlReader.Name == tag && xmlReader.Depth == depth)
@@ -531,16 +584,34 @@ namespace JDict
 
                 if (xmlReader.NodeType == XmlNodeType.Element && xmlReader.Name == "keb")
                 {
-                    kanjiElement = ReadKeb(xmlReader.Depth, xmlReader.Name);
+                    kanjiElement = ReadSimpleXmlTextElement(xmlReader.Depth, xmlReader.Name);
+                }
+                
+                if (xmlReader.NodeType == XmlNodeType.Element && xmlReader.Name == "ke_inf")
+                {
+                    var keInf = ReadKeInf(xmlReader.Depth, xmlReader.Name);
+                    if (keInf != null)
+                    {
+                        infoList.Add(keInf.Value);
+                    }
+                }
+                
+                if (xmlReader.NodeType == XmlNodeType.Element && xmlReader.Name == "ke_pri")
+                {
+                    var priorityTag = PriorityTag.FromString(ReadSimpleXmlTextElement(xmlReader.Depth, xmlReader.Name));
+                    priorityTag.MatchSome(p => priorities.Add(p));
                 }
             }
 
-            return kanjiElement;
+            return new JMDictKanji(
+                kanjiElement,
+                infoList,
+                priorities);
         }
 
-        private string ReadKeb(int depth, string tag)
+        private string ReadSimpleXmlTextElement(int depth, string tag)
         {
-            string kanjiElement = null;
+            string text = null;
             while (xmlReader.Read())
             {
                 if (xmlReader.NodeType == XmlNodeType.EndElement && xmlReader.Name == tag && xmlReader.Depth == depth)
@@ -550,16 +621,20 @@ namespace JDict
 
                 if (xmlReader.NodeType == XmlNodeType.Text)
                 {
-                    kanjiElement = xmlReader.Value;
+                    text = xmlReader.Value;
                 }
             }
 
-            return kanjiElement;
+            return text;
         }
         
-        private string ReadReadingElement(int depth, string tag)
+        private JMDictReading ReadReadingElement(int depth, string tag)
         {
             string readingElement = null;
+            bool notATrueReading = false;
+            var restrictedList = new List<string>();
+            var infoList = new List<EdictReadingInformation>();
+            var priorities = new List<PriorityTag>();
             while (xmlReader.Read())
             {
                 if (xmlReader.NodeType == XmlNodeType.EndElement && xmlReader.Name == tag && xmlReader.Depth == depth)
@@ -569,73 +644,41 @@ namespace JDict
 
                 if (xmlReader.NodeType == XmlNodeType.Element && xmlReader.Name == "reb")
                 {
-                    readingElement = ReadReb(xmlReader.Depth, xmlReader.Name);
+                    readingElement = ReadSimpleXmlTextElement(xmlReader.Depth, xmlReader.Name);
                 }
-            }
-
-            return readingElement;
-        }
-        
-        private string ReadReb(int depth, string tag)
-        {
-            string readingElement = null;
-            while (xmlReader.Read())
-            {
-                if (xmlReader.NodeType == XmlNodeType.EndElement && xmlReader.Name == tag && xmlReader.Depth == depth)
+                
+                if (xmlReader.NodeType == XmlNodeType.Element && xmlReader.Name == "re_nokanji")
                 {
-                    break;
+                    notATrueReading = true;
                 }
-
-                if (xmlReader.NodeType == XmlNodeType.Text)
+                
+                if (xmlReader.NodeType == XmlNodeType.Element && xmlReader.Name == "re_restr")
                 {
-                    readingElement = xmlReader.Value;
+                    restrictedList.Add(ReadSimpleXmlTextElement(xmlReader.Depth, xmlReader.Name));
                 }
-            }
-
-            return readingElement;
-        }
-
-        private JMDictEntry CreateEntry(JdicEntry xmlEntry, IReadOnlyDictionary<string, string> expandedNamesToAbbrevationsMapping)
-        {
-            return new JMDictEntry(
-                xmlEntry.Number,
-                xmlEntry.ReadingElements.Select(r => r.Reb).ToList(),
-                xmlEntry.KanjiElements.Select(k => k.Key).ToList(),
-                CreateSenses(xmlEntry, expandedNamesToAbbrevationsMapping));
-        }
-
-        private IReadOnlyCollection<JMDictSense> CreateSenses(JdicEntry xmlEntry, IReadOnlyDictionary<string, string> expandedNamesToAbbrevationsMapping)
-        {
-            var sense = new List<JMDictSense>();
-            string[] partOfSpeech = Array.Empty<string>();
-            var typedPartOfSpeech = new List<EdictPartOfSpeech>();
-            foreach (var s in xmlEntry.Senses)
-            {
-                if (s.PartOfSpeech.Length > 0)
+                
+                if (xmlReader.NodeType == XmlNodeType.Element && xmlReader.Name == "re_inf")
                 {
-                    partOfSpeech = s.PartOfSpeech;
-                    typedPartOfSpeech = partOfSpeech.Select(posStr =>
+                    var reInf = ReadReInf(xmlReader.Depth, xmlReader.Name);
+                    if (reInf != null)
                     {
-                        var unexpandedName = expandedNamesToAbbrevationsMapping[posStr];
-                        return EdictTypeUtils.FromAbbrevation(unexpandedName).ValueOr(() =>
-                        {
-                            Debug.WriteLine($"{posStr} unknown");
-                            return default(EdictPartOfSpeech);
-                        });
-                    }).ToList();
+                        infoList.Add(reInf.Value);
+                    }
                 }
-
-                sense.Add(new JMDictSense(
-                    partOfSpeech.Select(pos => EdictTypeUtils.FromAbbrevation(expandedNamesToAbbrevationsMapping[pos])).FirstOrNone().Flatten(),
-                    typedPartOfSpeech,
-                    s.Dialect.Select(d => EdictDialectUtils.FromAbbrevation(expandedNamesToAbbrevationsMapping[d])).Values().ToList(),
-                    s.Glosses.Select(g => g.Text.Trim()).ToList(),
-                    s.Information.ToList(),
-                    s.Field.Select(f => EdictFieldUtils.FromAbbrevation(expandedNamesToAbbrevationsMapping[f])).Values().ToList(),
-                    s.Misc.Select(m => EdictMiscUtils.FromAbbrevation(expandedNamesToAbbrevationsMapping[m])).Values().ToList()));
+                
+                if (xmlReader.NodeType == XmlNodeType.Element && xmlReader.Name == "re_pri")
+                {
+                    var priorityTag = PriorityTag.FromString(ReadSimpleXmlTextElement(xmlReader.Depth, xmlReader.Name));
+                    priorityTag.MatchSome(p => priorities.Add(p));
+                }
             }
 
-            return sense;
+            return new JMDictReading(
+                readingElement ?? throw new InvalidDataException(),
+                notATrueReading,
+                restrictedList,
+                infoList,
+                priorities);
         }
 
         public IEnumerable<JMDictEntry> ReadRemainingToEnd()

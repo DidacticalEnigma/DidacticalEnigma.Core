@@ -92,7 +92,7 @@ namespace DidacticalEnigma.Core.Models.LanguageService
                         return false;
 
                     var entireReading = kana.ToHiragana(string.Concat(wordInfos.Select(w => w.Reading)));
-                    if (l.Any(e => e.Readings.Any(r => entireReading == kana.ToHiragana(r))))
+                    if (l.Any(e => e.ReadingEntries.Any(r => entireReading == kana.ToHiragana(r.Reading))))
                     {
                         return true;
                     }
@@ -180,7 +180,7 @@ namespace DidacticalEnigma.Core.Models.LanguageService
                 if (wordInfo.DictionaryForm == null || wordInfo.DictionaryForm == wordInfo.RawWord)
                 {
                     var wordReading = kana.ToHiragana(wordInfo.Reading);
-                    if (entry.Readings.All(r => wordReading != kana.ToHiragana(r)))
+                    if (entry.ReadingEntries.All(r => wordReading != kana.ToHiragana(r.Reading)))
                     {
                         continue;
                     }

@@ -14,7 +14,7 @@ namespace JDict
 {
     public class JMDictLookup : IDisposable
     {
-        private static readonly Guid Version = new Guid("E42B739F-86DA-4303-87E2-9C1877769D0B");
+        private static readonly Guid Version = new Guid("F6CF2BC4-6A39-4703-A1B4-70D1C8B784FB");
 
         private TinyIndex.Database db;
 
@@ -26,10 +26,51 @@ namespace JDict
 
         private JMDictLookup Init(Stream stream, string cache)
         {
+            var priorityTagSerializer = Serializer.ForStringAsUTF8().Mapping(
+                raw => PriorityTag.FromString(raw),
+                pTag => pTag.Map(p => p.ToString()).ValueOr(""));
+            
             var entrySerializer = TinyIndex.Serializer.ForComposite()
                 .With(Serializer.ForLong())
-                .With(Serializer.ForReadOnlyCollection(Serializer.ForStringAsUTF8()))
-                .With(Serializer.ForReadOnlyCollection(Serializer.ForStringAsUTF8()))
+                .With(Serializer.ForReadOnlyCollection(Serializer.ForComposite()
+                    .With(Serializer.ForStringAsUTF8())
+                    .With(SerializerExt.ForBool())
+                    .With(Serializer.ForReadOnlyCollection(Serializer.ForStringAsUTF8()))
+                    .With(Serializer.ForReadOnlyCollection(Serializer.ForEnum<EdictReadingInformation>()))
+                    .With(Serializer.ForReadOnlyCollection(priorityTagSerializer))
+                    .Create()
+                    .Mapping(
+                        raw => new JMDictReading(
+                            (string)raw[0],
+                            (bool)raw[1],
+                            (IReadOnlyCollection<string>)raw[2],
+                            (IReadOnlyCollection<EdictReadingInformation>)raw[3],
+                            ((IReadOnlyCollection<Option<PriorityTag>>)raw[4]).Values().ToList()),
+                        obj => new object[]
+                        {
+                            obj.Reading,
+                            obj.NotATrueReading,
+                            obj.ValidReadingFor,
+                            obj.ReadingInformation,
+                            obj.PriorityInfo.Select(p => p.Some()).ToList()
+                        })
+                ))
+                .With(Serializer.ForReadOnlyCollection(Serializer.ForComposite()
+                    .With(Serializer.ForStringAsUTF8())
+                    .With(Serializer.ForReadOnlyCollection(Serializer.ForEnum<EdictKanjiInformation>()))
+                    .With(Serializer.ForReadOnlyCollection(priorityTagSerializer))
+                    .Create()
+                    .Mapping(
+                        raw => new JMDictKanji(
+                            (string)raw[0],
+                            (IReadOnlyCollection<EdictKanjiInformation>)raw[1],
+                            ((IReadOnlyCollection<Option<PriorityTag>>)raw[2]).Values().ToList()),
+                        obj => new object[]
+                        {
+                            obj.Kanji,
+                            obj.Informational,
+                            obj.PriorityInfo.Select(p => p.Some()).ToList()
+                        })))
                 .With(Serializer.ForReadOnlyCollection(Serializer.ForComposite()
                     .With(SerializerExt.ForOption(Serializer.ForEnum<EdictPartOfSpeech>()))
                     .With(Serializer.ForReadOnlyCollection(Serializer.ForEnum<EdictPartOfSpeech>()))
@@ -62,14 +103,14 @@ namespace JDict
                 .Mapping(
                     raw => new JMDictEntry(
                         (long)raw[0],
-                        (IReadOnlyCollection<string>)raw[1],
-                        (IReadOnlyCollection<string>)raw[2],
+                        (IReadOnlyCollection<JMDictReading>)raw[1],
+                        (IReadOnlyCollection<JMDictKanji>)raw[2],
                         (IReadOnlyCollection<JMDictSense>)raw[3]),
                     obj => new object[]
                     {
                         obj.SequenceNumber,
-                        obj.Readings,
-                        obj.Kanji,
+                        obj.ReadingEntries,
+                        obj.KanjiEntries,
                         obj.Senses
                     });
 
@@ -86,14 +127,14 @@ namespace JDict
                             {
                                 foreach (var e in entries)
                                 {
-                                    foreach (var r in e.Kanji)
+                                    foreach (var k in e.KanjiEntries)
                                     {
-                                        yield return new KeyValuePair<long, string>(e.SequenceNumber, r);
+                                        yield return new KeyValuePair<long, string>(e.SequenceNumber, k.Kanji);
                                     }
 
-                                    foreach (var r in e.Readings)
+                                    foreach (var r in e.ReadingEntries)
                                     {
-                                        yield return new KeyValuePair<long, string>(e.SequenceNumber, r);
+                                        yield return new KeyValuePair<long, string>(e.SequenceNumber, r.Reading);
                                     }
                                 }
                             }

@@ -46,24 +46,24 @@ namespace DidacticalEnigma.Core.Models.DataSources
                 var l = new List<Text>();
                 {
                     bool first = true;
-                    foreach (var kanji in entry.Kanji)
+                    foreach (var kanji in entry.KanjiEntries)
                     {
                         if (!first)
                             l.Add(new Text(";  "));
                         first = false;
-                        l.Add(new Text(kanji));
+                        l.Add(new Text(kanji.Kanji));
                     }
 
                     l.Add(new Text("\n"));
                 }
                 {
                     bool first = true;
-                    foreach (var reading in entry.Readings)
+                    foreach (var reading in entry.ReadingEntries)
                     {
                         if (!first)
                             l.Add(new Text("\n"));
                         first = false;
-                        l.Add(new Text(reading));
+                        l.Add(new Text(reading.Reading));
                     }
 
                     l.Add(new Text("\n"));

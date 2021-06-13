@@ -50,7 +50,7 @@ namespace DidacticalEnigma.Core.Models.DataSources
 
             var verbTypes = entries.Select(e =>
             {
-                if(!e.Readings.Any())
+                if(!e.ReadingEntries.Any())
                     return Option.None<EdictType>();
                 return GetEdictVerbType(e);
             })

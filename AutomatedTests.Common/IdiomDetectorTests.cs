@@ -42,7 +42,7 @@ namespace AutomatedTests
         public void Basic()
         {
             var entries = idiomDetector.Detect("鼻の下");
-            var result = entries.First(e => e.DictionaryEntry.Kanji.Contains("鼻の下を伸ばす"));
+            var result = entries.First(e => e.DictionaryEntry.KanjiEntries.Select(k => k.Kanji).Contains("鼻の下を伸ばす"));
             CollectionAssert.AreEqual(new[]
             {
                 ("鼻の下", true),
@@ -54,7 +54,7 @@ namespace AutomatedTests
         public void Basic2()
         {
             var entries = idiomDetector.Detect("じゃねえかな");
-            var result = entries.First(e => e.DictionaryEntry.Readings.Contains("じゃしょういちにょ"));
+            var result = entries.First(e => e.DictionaryEntry.ReadingEntries.Select(r => r.Reading).Contains("じゃしょういちにょ"));
             CollectionAssert.AreEqual(new[]
             {
                 ("じゃ", true),
@@ -73,13 +73,13 @@ namespace AutomatedTests
         public void Basic4()
         {
             var entries = idiomDetector.Detect("同士").ToList();
-            Assert.True(entries.SelectMany(e => e.DictionaryEntry.Kanji).Contains("女同士"));
+            Assert.True(entries.SelectMany(e => e.DictionaryEntry.KanjiEntries).Select(k => k.Kanji).Contains("女同士"));
         }
 
         [Test]
         public void Basic5()
         {
-            var entry = idiomDetector.Detect("何も問題ない").First(e => e.DictionaryEntry.Kanji.Contains("何の変哲もない"));
+            var entry = idiomDetector.Detect("何も問題ない").First(e => e.DictionaryEntry.KanjiEntries.Select(k => k.Kanji).Contains("何の変哲もない"));
             CollectionAssert.AreEqual(new[]
             {
                 ("何", true),

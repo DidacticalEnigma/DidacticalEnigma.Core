@@ -64,5 +64,33 @@ namespace JDict
         {
             return new OptionalSerializer<T>(serializer);
         }
+
+        private class BoolSerializer : IConstSizeSerializer<bool>
+        {
+            public bool Deserialize(ReadOnlySpan<byte> input)
+            {
+                return input[0] != 0;
+            }
+
+            public bool TrySerialize(bool element, Span<byte> output, out int actualSize)
+            {
+                if (output.IsEmpty)
+                {
+                    actualSize = 1;
+                    return false;
+                }
+
+                output[0] = element ? (byte)1 : (byte)0;
+                actualSize = 1;
+                return true;
+            }
+
+            public int ElementSize => 1;
+        }
+        
+        public static ISerializer<bool> ForBool()
+        {
+            return new BoolSerializer();
+        }
     }
 }

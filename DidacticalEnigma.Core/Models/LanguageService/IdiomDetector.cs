@@ -50,8 +50,9 @@ namespace DidacticalEnigma.Core.Models.LanguageService
 
         private string OriginalNotNormalized(string normalized, JMDictEntry entry)
         {
-            return entry.Kanji
-                .Concat(entry.Readings)
+            return entry.KanjiEntries
+                .Select(k => k.Kanji)
+                .Concat(entry.ReadingEntries.Select(r => r.Reading))
                 .FirstOrNone(s => Normalize(s) == normalized)
                 .ValueOr(normalized);
         }
@@ -188,7 +189,7 @@ namespace DidacticalEnigma.Core.Models.LanguageService
                 .Where(entry =>
                     entry.Senses.Any(s =>
                         s.PartOfSpeechInfo.Any(pos => pos == EdictPartOfSpeech.exp)))
-                .SelectMany(entry => entry.Kanji.Concat(entry.Readings).Select(e => new KeyValuePair<string, long>(Normalize(e), entry.SequenceNumber)));
+                .SelectMany(entry => entry.KanjiEntries.Select(k => k.Kanji).Concat(entry.ReadingEntries.Select(r => r.Reading)).Select(e => new KeyValuePair<string, long>(Normalize(e), entry.SequenceNumber)));
             var rotations = exprs
                 .SelectMany(e =>
                     StringExt.AllRotationsOf(e.Key + "\0")

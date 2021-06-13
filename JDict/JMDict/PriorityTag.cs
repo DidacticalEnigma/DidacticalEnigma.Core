@@ -1,4 +1,5 @@
 using System;
+using Optional;
 
 namespace JDict
 {
@@ -59,13 +60,14 @@ namespace JDict
 
         public static PriorityTag Nf(int rating) => new PriorityTag(rating, Kind.nf);
 
-        public static PriorityTag FromString(string str)
+        public static Option<PriorityTag> FromString(string str)
         {
             if (TryParse(str, out var tag))
             {
-                return tag;
+                return tag.Some();
             }
-            throw new ArgumentException("Invalid priority tag", nameof(str));
+
+            return Option.None<PriorityTag>();
 
 
             bool TryParse(string s, out PriorityTag t)

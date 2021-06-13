@@ -2,7 +2,7 @@ using System.ComponentModel;
 
 namespace JDict
 {
-    enum EdictReadingInformation
+    public enum EdictReadingInformation
     {
         // reserving 0 for an "unknown"
         [Description("gikun (meaning as reading) or jukujikun (special kanji reading)")]

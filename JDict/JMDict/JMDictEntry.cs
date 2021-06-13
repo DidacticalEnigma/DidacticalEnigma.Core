@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace JDict
@@ -7,9 +9,15 @@ namespace JDict
     {
         public long SequenceNumber { get; }
 
-        public IEnumerable<string> Readings { get; }
+        public IEnumerable<JMDictReading> ReadingEntries { get; }
 
-        public IEnumerable<string> Kanji { get; }
+        public IEnumerable<JMDictKanji> KanjiEntries { get; }
+        
+        [Obsolete]
+        public IEnumerable<string> Readings => ReadingEntries.Select(r => r.Reading);
+
+        [Obsolete]
+        public IEnumerable<string> Kanji => KanjiEntries.Select(k => k.Kanji);
 
         public IEnumerable<JMDictSense> Senses { get; }
 
@@ -51,13 +59,13 @@ namespace JDict
 
         public JMDictEntry(
             long sequenceNumber,
-            IReadOnlyCollection<string> readings,
-            IReadOnlyCollection<string> kanji,
+            IReadOnlyCollection<JMDictReading> readingEntries,
+            IReadOnlyCollection<JMDictKanji> kanjiEntries,
             IReadOnlyCollection<JMDictSense> senses)
         {
             SequenceNumber = sequenceNumber;
-            Readings = readings;
-            Kanji = kanji;
+            ReadingEntries = readingEntries;
+            KanjiEntries = kanjiEntries;
             Senses = senses;
         }
     }
