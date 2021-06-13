@@ -81,17 +81,29 @@ namespace JDict
                 
                 if (xmlReader.NodeType == XmlNodeType.Element && xmlReader.Name == "pos")
                 {
-                    partOfSpeechList.Add(ReadPos(xmlReader.Depth, xmlReader.Name));
+                    var pos = ReadPos(xmlReader.Depth, xmlReader.Name);
+                    if (pos != null)
+                    {
+                        partOfSpeechList.Add(pos.Value);
+                    }
                 }
                 
                 if (xmlReader.NodeType == XmlNodeType.Element && xmlReader.Name == "field")
                 {
-                    fieldList.Add(ReadField(xmlReader.Depth, xmlReader.Name));
+                    var field = ReadField(xmlReader.Depth, xmlReader.Name);
+                    if (field != null)
+                    {
+                        fieldList.Add(field.Value);
+                    }
                 }
                 
                 if (xmlReader.NodeType == XmlNodeType.Element && xmlReader.Name == "misc")
                 {
-                    miscList.Add(ReadMisc(xmlReader.Depth, xmlReader.Name));
+                    var misc = ReadMisc(xmlReader.Depth, xmlReader.Name);
+                    if (misc != null)
+                    {
+                        miscList.Add(misc.Value);
+                    }
                 }
                 
                 if (xmlReader.NodeType == XmlNodeType.Element && xmlReader.Name == "s_inf")
@@ -101,7 +113,11 @@ namespace JDict
                 
                 if (xmlReader.NodeType == XmlNodeType.Element && xmlReader.Name == "dial")
                 {
-                    dialectList.Add(ReadDial(xmlReader.Depth, xmlReader.Name));
+                    var dialect = ReadDial(xmlReader.Depth, xmlReader.Name);
+                    if (dialect != null)
+                    {
+                        dialectList.Add(dialect.Value);
+                    }
                 }
                 
                 if (xmlReader.NodeType == XmlNodeType.Element && xmlReader.Name == "gloss")
@@ -126,7 +142,7 @@ namespace JDict
                 miscList);
         }
 
-        private EdictPartOfSpeech ReadPos(int depth, string tag)
+        private EdictPartOfSpeech? ReadPos(int depth, string tag)
         {
             EdictPartOfSpeech? pos = null;
             while (xmlReader.Read())
@@ -236,7 +252,7 @@ namespace JDict
                 }
             }
 
-            return pos ?? throw new InvalidDataException();
+            return pos;
         }
 
         private string ReadGloss(int depth, string tag)
@@ -258,7 +274,7 @@ namespace JDict
             return sInf ?? throw new InvalidDataException();
         }
 
-        private EdictDialect ReadDial(int depth, string tag)
+        private EdictDialect? ReadDial(int depth, string tag)
         {
             EdictDialect? dial = null;
             while (xmlReader.Read())
@@ -288,7 +304,7 @@ namespace JDict
                 }
             }
 
-            return dial ?? throw new InvalidDataException();
+            return dial;
         }
 
         private string ReadSInf(int depth, string tag)
@@ -310,9 +326,7 @@ namespace JDict
             return sInf ?? throw new InvalidDataException();
         }
 
-        int a = 0;
-        
-        private EdictMisc ReadMisc(int depth, string tag)
+        private EdictMisc? ReadMisc(int depth, string tag)
         {
             EdictMisc? misc = null;
             
@@ -386,10 +400,10 @@ namespace JDict
                 }
             }
 
-            return misc ?? throw new InvalidDataException();
+            return misc;
         }
 
-        private EdictField ReadField(int depth, string tag)
+        private EdictField? ReadField(int depth, string tag)
         {
             EdictField? field = null;
             while (xmlReader.Read())
@@ -479,7 +493,7 @@ namespace JDict
                 }
             }
 
-            return field ?? throw new InvalidDataException();
+            return field;
         }
 
         private long? ReadEntSeq(int depth, string tag)
