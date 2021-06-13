@@ -11,13 +11,15 @@ namespace JDict
     public class JMNedictParser : IDisposable
     {
         private XmlTextReader xmlReader;
-        private DualDictionary<string, string> friendlyNames;
+        
+        public DualDictionary<string, string> FriendlyNames { get; }
+        
         private Stream stream;
 
         private JMNedictParser(XmlTextReader xmlReader, DualDictionary<string, string> friendlyNames, Stream stream)
         {
             this.xmlReader = xmlReader;
-            this.friendlyNames = friendlyNames;
+            this.FriendlyNames = friendlyNames;
             this.stream = stream;
         }
 
@@ -27,7 +29,7 @@ namespace JDict
             
             var xmlReader = new XmlTextReader(stream);
             xmlReader.EntityHandling = EntityHandling.ExpandCharEntities;
-            xmlReader.DtdProcessing = DtdProcessing.Ignore;
+            xmlReader.DtdProcessing = DtdProcessing.Parse;
             xmlReader.XmlResolver = null;
             while (xmlReader.Read())
             {

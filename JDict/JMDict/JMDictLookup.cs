@@ -14,7 +14,7 @@ namespace JDict
 {
     public class JMDictLookup : IDisposable
     {
-        private static readonly Guid Version = new Guid("F6CF2BC4-6A39-4703-A1B4-70D1C8B784FB");
+        private static readonly Guid Version = new Guid("9FAF5E7C-7782-481A-8F7E-F8E91FB04800");
 
         private TinyIndex.Database db;
 

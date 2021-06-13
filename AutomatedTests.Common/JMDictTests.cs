@@ -2,6 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using NUnit.Framework;
 using JDict;
@@ -52,6 +54,23 @@ namespace AutomatedTests
                 var entries = jmdict.Lookup("私");
                 Assert.False(entries.Any(e => e.Senses.Any(s => s.Glosses.Contains("south"))));
             }
+            {
+                var entries = jmdict.Lookup("洞穴");
+                Assert.True(entries.Any(e => e.Senses.Any(s => s.PartOfSpeechInfo.Contains(EdictPartOfSpeech.n))));
+            }
+        }
+        
+        [Test]
+        public void FriendlyNameMapping()
+        {
+            using (var file = File.OpenRead(TestDataPaths.JMDict))
+            using (var gzip = new GZipStream(file, CompressionMode.Decompress))
+            {
+                var jparser = JMDictParser.Create(gzip);
+                CollectionAssert.IsNotEmpty(jparser.FriendlyNames);
+            }
+            
+            Assert.AreEqual("noun (common) (futsuumeishi)",jmdict.FriendlyDescriptionOf(EdictPartOfSpeech.n));
         }
 
         [Test]

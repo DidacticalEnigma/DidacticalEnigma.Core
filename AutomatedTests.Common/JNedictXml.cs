@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
+using JDict;
 using JDict.Xml;
 using Newtonsoft.Json;
 using NUnit.Framework;
@@ -35,6 +36,17 @@ namespace AutomatedTests
                 second = DeserializeNewImpl(gzip).ToList();
             }
             CollectionAssert.AreEqual(first.Select(x => SerializeToString(x)), second.Select(x => SerializeToString(x)));
+        }
+
+        [Test]
+        public void Parsing()
+        {
+            using (var file = File.OpenRead(TestDataPaths.JMDict))
+            using (var gzip = new GZipStream(file, CompressionMode.Decompress))
+            {
+                var jparser = JMNedictParser.Create(gzip);
+                CollectionAssert.IsNotEmpty(jparser.FriendlyNames);
+            }
         }
 
         [Explicit]

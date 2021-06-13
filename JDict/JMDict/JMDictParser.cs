@@ -697,7 +697,7 @@ namespace JDict
 
             var xmlReader = new XmlTextReader(stream);
             xmlReader.EntityHandling = EntityHandling.ExpandCharEntities;
-            xmlReader.DtdProcessing = DtdProcessing.Ignore;
+            xmlReader.DtdProcessing = DtdProcessing.Parse;
             xmlReader.XmlResolver = null;
             while (xmlReader.Read())
             {
