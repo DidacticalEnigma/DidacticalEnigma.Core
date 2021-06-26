@@ -23,6 +23,16 @@ namespace JDict
         public IEnumerable<EdictField> FieldData { get; }
         
         public IEnumerable<EdictMisc> Misc { get; }
+        
+        public IEnumerable<string> RestrictedToKanji { get; }
+        
+        public IEnumerable<string> RestrictedToReading { get; }
+        
+        public IEnumerable<EdictLoanSource> LoanSources { get; }
+        
+        public IEnumerable<EdictCrossReference> CrossReferences { get; }
+        
+        public IEnumerable<EdictCrossReference> Antonyms { get; }
 
         public JMDictSense(
             Option<EdictPartOfSpeech> type,
@@ -31,7 +41,12 @@ namespace JDict
             IReadOnlyCollection<string> text,
             IReadOnlyCollection<string> informational,
             IReadOnlyCollection<EdictField> field,
-            IReadOnlyCollection<EdictMisc> misc)
+            IReadOnlyCollection<EdictMisc> misc,
+            IReadOnlyCollection<string> stagkList,
+            IReadOnlyCollection<string> stagrList,
+            IReadOnlyCollection<EdictLoanSource> lsourceList,
+            IReadOnlyCollection<EdictCrossReference> xrefList,
+            IReadOnlyCollection<EdictCrossReference> antList)
         {
             Type = type;
             PartOfSpeechInfo = pos;
@@ -40,6 +55,11 @@ namespace JDict
             Informational = informational;
             FieldData = field;
             Misc = misc;
+            RestrictedToKanji = stagkList;
+            RestrictedToReading = stagrList;
+            LoanSources = lsourceList;
+            CrossReferences = xrefList;
+            Antonyms = antList;
         }
 
         public override string ToString()

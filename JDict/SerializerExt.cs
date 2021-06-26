@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Runtime.CompilerServices;
 using Optional;
 using TinyIndex;
@@ -91,6 +93,81 @@ namespace JDict
         public static ISerializer<bool> ForBool()
         {
             return new BoolSerializer();
+        }
+        
+        internal class VariantSerializer<T> : ISerializer<(T element, int variant)>
+        {
+            private readonly List<ISerializer<T>> serializers;
+
+            internal VariantSerializer(List<ISerializer<T>> serializers)
+            {
+                this.serializers = serializers;
+            }
+
+            public (T element, int variant) Deserialize(ReadOnlySpan<byte> input)
+            {
+                var variant = (int)input[0];
+                input = input.Slice(1);
+                return (serializers[variant].Deserialize(input), variant);
+            }
+
+            public bool TrySerialize((T element, int variant) element, Span<byte> output, out int actualSize)
+            {
+                if (element.variant > byte.MaxValue)
+                {
+                    throw new ArgumentException("the variant index can't be larger than 255", nameof(element));
+                }
+
+                if (output.IsEmpty)
+                {
+                    actualSize = 0;
+                    return false;
+                }
+
+                output[0] = (byte) element.variant;
+                output = output.Slice(1);
+                var success = serializers[element.variant].TrySerialize(element.element, output, out var size);
+                if (success)
+                {
+                    actualSize = size + 1;
+                    return true;
+                }
+                else
+                {
+                    actualSize = 0;
+                    return false;
+                }
+            }
+        }
+        
+        public class VariantSerializerBuilder<T>
+        {
+            private List<ISerializer<T>> serializers = new List<ISerializer<T>>();
+
+            public VariantSerializerBuilder<T> With(ISerializer<T> serializer)
+            {
+                if (serializers.Count > byte.MaxValue)
+                {
+                    throw new InvalidOperationException("can't have more than 255 options in a variant");
+                }
+                serializers.Add(serializer);
+                return this;
+            }
+
+            public ISerializer<(T element, int variant)> Create()
+            {
+                return new VariantSerializer<T>(serializers);
+            }
+
+            internal VariantSerializerBuilder()
+            {
+
+            }
+        }
+
+        public static VariantSerializerBuilder<T> ForVariant<T>()
+        {
+            return new VariantSerializerBuilder<T>();
         }
     }
 }

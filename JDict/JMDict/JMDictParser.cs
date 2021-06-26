@@ -70,14 +70,27 @@ namespace JDict
             var infoList = new List<string>();
             var fieldList = new List<EdictField>();
             var miscList = new List<EdictMisc>();
+            var stagkList = new List<string>();
+            var stagrList = new List<string>();
+            var lsourceList = new List<EdictLoanSource>();
+            var xrefList = new List<EdictCrossReference>();
+            var antList = new List<EdictCrossReference>();
             while (xmlReader.Read())
             {
                 if (xmlReader.NodeType == XmlNodeType.EndElement && xmlReader.Name == tag && xmlReader.Depth == depth)
                 {
                     break;
                 }
+
+                if (xmlReader.NodeType == XmlNodeType.Element && xmlReader.Name == "stagk")
+                {
+                    stagkList.Add(ReadSimpleXmlTextElement(xmlReader.Depth, xmlReader.Name));
+                }
                 
-                // stagk*, stagr*, xref*, ant*, lsource*, dial*, gloss*
+                if (xmlReader.NodeType == XmlNodeType.Element && xmlReader.Name == "stagr")
+                {
+                    stagrList.Add(ReadSimpleXmlTextElement(xmlReader.Depth, xmlReader.Name));
+                }
                 
                 if (xmlReader.NodeType == XmlNodeType.Element && xmlReader.Name == "pos")
                 {
@@ -95,6 +108,18 @@ namespace JDict
                     {
                         fieldList.Add(field.Value);
                     }
+                }
+                
+                if (xmlReader.NodeType == XmlNodeType.Element && xmlReader.Name == "xref")
+                {
+                    var xref = EdictCrossReference.Parse(ReadSimpleXmlTextElement(xmlReader.Depth, xmlReader.Name));
+                    xrefList.Add(xref);
+                }
+                
+                if (xmlReader.NodeType == XmlNodeType.Element && xmlReader.Name == "ant")
+                {
+                    var ant = EdictCrossReference.Parse(ReadSimpleXmlTextElement(xmlReader.Depth, xmlReader.Name));
+                    antList.Add(ant);
                 }
                 
                 if (xmlReader.NodeType == XmlNodeType.Element && xmlReader.Name == "misc")
@@ -120,6 +145,11 @@ namespace JDict
                     }
                 }
                 
+                if (xmlReader.NodeType == XmlNodeType.Element && xmlReader.Name == "lsource")
+                {
+                    lsourceList.Add(ReadLsource(xmlReader.Depth, xmlReader.Name));
+                }
+                
                 if (xmlReader.NodeType == XmlNodeType.Element && xmlReader.Name == "gloss")
                 {
                     textEntryList.Add(ReadGloss(xmlReader.Depth, xmlReader.Name));
@@ -139,7 +169,50 @@ namespace JDict
                 textEntryList,
                 infoList,
                 fieldList,
-                miscList);
+                miscList,
+                stagkList,
+                stagrList,
+                lsourceList,
+                xrefList,
+                antList);
+        }
+
+        private EdictLoanSource ReadLsource(int depth, string tag)
+        {
+            Option<string> loanWord = Option.None<string>();
+            bool wasei = xmlReader.GetAttribute("ls_wasei") != null;
+            string language = xmlReader.GetAttribute("xml:lang") ?? "eng";
+            EdictLoanSourceType loanSourceType;
+            switch (xmlReader.GetAttribute("ls_wasei"))
+            {
+                case "part":
+                    loanSourceType = EdictLoanSourceType.Partial;
+                    break;
+                case "full":
+                    loanSourceType = EdictLoanSourceType.Full;
+                    break;
+                default:
+                    loanSourceType = EdictLoanSourceType.Unknown;
+                    break;
+            }
+
+            if (!xmlReader.IsEmptyElement)
+            {
+                while (xmlReader.Read())
+                {
+                    if (xmlReader.NodeType == XmlNodeType.EndElement && xmlReader.Name == tag && xmlReader.Depth == depth)
+                    {
+                        break;
+                    }
+                
+                    if (xmlReader.NodeType == XmlNodeType.Text)
+                    {
+                        loanWord = xmlReader.Value.Some();
+                    }
+                }
+            }
+            
+            return new EdictLoanSource(language, wasei, loanSourceType, loanWord);
         }
 
         private EdictPartOfSpeech? ReadPos(int depth, string tag)

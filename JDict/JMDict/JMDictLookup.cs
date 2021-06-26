@@ -14,7 +14,7 @@ namespace JDict
 {
     public class JMDictLookup : IDisposable
     {
-        private static readonly Guid Version = new Guid("9FAF5E7C-7782-481A-8F7E-F8E91FB04800");
+        private static readonly Guid Version = new Guid("4C89E7F0-3E12-4B64-B8B9-4299AC43E9B4");
 
         private TinyIndex.Database db;
 
@@ -29,76 +29,120 @@ namespace JDict
             var priorityTagSerializer = Serializer.ForStringAsUTF8().Mapping(
                 raw => PriorityTag.FromString(raw),
                 pTag => pTag.Map(p => p.ToString()).ValueOr(""));
+
+            var crossReferenceSerializer = Serializer.ForStringAsUTF8().Mapping(
+                raw => EdictCrossReference.Parse(raw),
+                obj => obj.ToString());
+
+            var loanSourceSerializer = Serializer.ForComposite()
+                .With(Serializer.ForStringAsUTF8())
+                .With(SerializerExt.ForBool())
+                .With(Serializer.ForEnum<EdictLoanSourceType>())
+                .With(SerializerExt.ForOption(Serializer.ForStringAsUTF8()))
+                .Create()
+                .Mapping(
+                    raw => new EdictLoanSource(
+                        (string) raw[0],
+                        (bool) raw[1],
+                        (EdictLoanSourceType) raw[2],
+                        (Option<string>) raw[3]),
+                    obj => new object[]
+                    {
+                        obj.SourceLanguage,
+                        obj.Wasei,
+                        obj.SourceType,
+                        obj.LoanWord
+                    });
+
+            var kanjiSerializer = Serializer.ForComposite()
+                .With(Serializer.ForStringAsUTF8())
+                .With(SerializerExt.ForBool())
+                .With(Serializer.ForReadOnlyCollection(Serializer.ForStringAsUTF8()))
+                .With(Serializer.ForReadOnlyCollection(Serializer.ForEnum<EdictReadingInformation>()))
+                .With(Serializer.ForReadOnlyCollection(priorityTagSerializer))
+                .Create()
+                .Mapping(
+                    raw => new JMDictReading(
+                        (string) raw[0],
+                        (bool) raw[1],
+                        (IReadOnlyCollection<string>) raw[2],
+                        (IReadOnlyCollection<EdictReadingInformation>) raw[3],
+                        ((IReadOnlyCollection<Option<PriorityTag>>) raw[4]).Values().ToList()),
+                    obj => new object[]
+                    {
+                        obj.Reading,
+                        obj.NotATrueReading,
+                        obj.ValidReadingFor,
+                        obj.ReadingInformation,
+                        obj.PriorityInfo.Select(p => p.Some()).ToList()
+                    });
+
+            var readingSerializer = Serializer.ForComposite()
+                .With(Serializer.ForStringAsUTF8())
+                .With(Serializer.ForReadOnlyCollection(Serializer.ForEnum<EdictKanjiInformation>()))
+                .With(Serializer.ForReadOnlyCollection(priorityTagSerializer))
+                .Create()
+                .Mapping(
+                    raw => new JMDictKanji(
+                        (string) raw[0],
+                        (IReadOnlyCollection<EdictKanjiInformation>) raw[1],
+                        ((IReadOnlyCollection<Option<PriorityTag>>) raw[2]).Values().ToList()),
+                    obj => new object[]
+                    {
+                        obj.Kanji,
+                        obj.Informational,
+                        obj.PriorityInfo.Select(p => p.Some()).ToList()
+                    });
+
+            var senseSerializer = Serializer.ForComposite()
+                .With(SerializerExt.ForOption(Serializer.ForEnum<EdictPartOfSpeech>()))
+                .With(Serializer.ForReadOnlyCollection(Serializer.ForEnum<EdictPartOfSpeech>()))
+                .With(Serializer.ForReadOnlyCollection(Serializer.ForEnum<EdictDialect>()))
+                .With(Serializer.ForReadOnlyCollection(Serializer.ForStringAsUTF8()))
+                .With(Serializer.ForReadOnlyCollection(Serializer.ForStringAsUTF8()))
+                .With(Serializer.ForReadOnlyCollection(Serializer.ForEnum<EdictField>()))
+                .With(Serializer.ForReadOnlyCollection(Serializer.ForEnum<EdictMisc>()))
+                .With(Serializer.ForReadOnlyCollection(Serializer.ForStringAsUTF8()))
+                .With(Serializer.ForReadOnlyCollection(Serializer.ForStringAsUTF8()))
+                .With(Serializer.ForReadOnlyCollection(loanSourceSerializer))
+                .With(Serializer.ForReadOnlyCollection(crossReferenceSerializer))
+                .With(Serializer.ForReadOnlyCollection(crossReferenceSerializer))
+                .Create()
+                .Mapping(
+                    raw => new JMDictSense(
+                        (Option<EdictPartOfSpeech>) raw[0],
+                        (IReadOnlyCollection<EdictPartOfSpeech>) raw[1],
+                        (IReadOnlyCollection<EdictDialect>) raw[2],
+                        (IReadOnlyCollection<string>) raw[3],
+                        (IReadOnlyCollection<string>) raw[4],
+                        (IReadOnlyCollection<EdictField>) raw[5],
+                        (IReadOnlyCollection<EdictMisc>) raw[6],
+                        (IReadOnlyCollection<string>) raw[7],
+                        (IReadOnlyCollection<string>) raw[8],
+                        (IReadOnlyCollection<EdictLoanSource>) raw[9],
+                        (IReadOnlyCollection<EdictCrossReference>) raw[10],
+                        (IReadOnlyCollection<EdictCrossReference>) raw[11]),
+                    obj => new object[]
+                    {
+                        obj.Type,
+                        obj.PartOfSpeechInfo,
+                        obj.DialectalInfo,
+                        obj.Glosses,
+                        obj.Informational,
+                        obj.FieldData,
+                        obj.Misc,
+                        obj.RestrictedToKanji,
+                        obj.RestrictedToReading,
+                        obj.LoanSources,
+                        obj.CrossReferences,
+                        obj.Antonyms
+                    });
             
             var entrySerializer = TinyIndex.Serializer.ForComposite()
                 .With(Serializer.ForLong())
-                .With(Serializer.ForReadOnlyCollection(Serializer.ForComposite()
-                    .With(Serializer.ForStringAsUTF8())
-                    .With(SerializerExt.ForBool())
-                    .With(Serializer.ForReadOnlyCollection(Serializer.ForStringAsUTF8()))
-                    .With(Serializer.ForReadOnlyCollection(Serializer.ForEnum<EdictReadingInformation>()))
-                    .With(Serializer.ForReadOnlyCollection(priorityTagSerializer))
-                    .Create()
-                    .Mapping(
-                        raw => new JMDictReading(
-                            (string)raw[0],
-                            (bool)raw[1],
-                            (IReadOnlyCollection<string>)raw[2],
-                            (IReadOnlyCollection<EdictReadingInformation>)raw[3],
-                            ((IReadOnlyCollection<Option<PriorityTag>>)raw[4]).Values().ToList()),
-                        obj => new object[]
-                        {
-                            obj.Reading,
-                            obj.NotATrueReading,
-                            obj.ValidReadingFor,
-                            obj.ReadingInformation,
-                            obj.PriorityInfo.Select(p => p.Some()).ToList()
-                        })
-                ))
-                .With(Serializer.ForReadOnlyCollection(Serializer.ForComposite()
-                    .With(Serializer.ForStringAsUTF8())
-                    .With(Serializer.ForReadOnlyCollection(Serializer.ForEnum<EdictKanjiInformation>()))
-                    .With(Serializer.ForReadOnlyCollection(priorityTagSerializer))
-                    .Create()
-                    .Mapping(
-                        raw => new JMDictKanji(
-                            (string)raw[0],
-                            (IReadOnlyCollection<EdictKanjiInformation>)raw[1],
-                            ((IReadOnlyCollection<Option<PriorityTag>>)raw[2]).Values().ToList()),
-                        obj => new object[]
-                        {
-                            obj.Kanji,
-                            obj.Informational,
-                            obj.PriorityInfo.Select(p => p.Some()).ToList()
-                        })))
-                .With(Serializer.ForReadOnlyCollection(Serializer.ForComposite()
-                    .With(SerializerExt.ForOption(Serializer.ForEnum<EdictPartOfSpeech>()))
-                    .With(Serializer.ForReadOnlyCollection(Serializer.ForEnum<EdictPartOfSpeech>()))
-                    .With(Serializer.ForReadOnlyCollection(Serializer.ForEnum<EdictDialect>()))
-                    .With(Serializer.ForReadOnlyCollection(Serializer.ForStringAsUTF8()))
-                    .With(Serializer.ForReadOnlyCollection(Serializer.ForStringAsUTF8()))
-                    .With(Serializer.ForReadOnlyCollection(Serializer.ForEnum<EdictField>()))
-                    .With(Serializer.ForReadOnlyCollection(Serializer.ForEnum<EdictMisc>()))
-                    .Create()
-                    .Mapping(
-                        raw => new JMDictSense(
-                            (Option<EdictPartOfSpeech>)raw[0],
-                            (IReadOnlyCollection<EdictPartOfSpeech>)raw[1],
-                            (IReadOnlyCollection<EdictDialect>)raw[2],
-                            (IReadOnlyCollection<string>)raw[3],
-                            (IReadOnlyCollection<string>)raw[4],
-                            (IReadOnlyCollection<EdictField>)raw[5],
-                            (IReadOnlyCollection<EdictMisc>)raw[6]),
-                        obj => new object[]
-                        {
-                            obj.Type,
-                            obj.PartOfSpeechInfo,
-                            obj.DialectalInfo,
-                            obj.Glosses,
-                            obj.Informational,
-                            obj.FieldData,
-                            obj.Misc
-                        })))
+                .With(Serializer.ForReadOnlyCollection(kanjiSerializer))
+                .With(Serializer.ForReadOnlyCollection(readingSerializer))
+                .With(Serializer.ForReadOnlyCollection(senseSerializer))
                 .Create()
                 .Mapping(
                     raw => new JMDictEntry(
@@ -120,8 +164,10 @@ namespace JDict
                     .AddIndirectArray(entrySerializer, db => jmdictParser.ReadRemainingToEnd(),
                         x => x.SequenceNumber)
                     .AddIndirectArray(
-                        TinyIndex.Serializer.ForKeyValuePair(TinyIndex.Serializer.ForStringAsUTF8(),
-                            TinyIndex.Serializer.ForReadOnlyList(TinyIndex.Serializer.ForLong())), db =>
+                        TinyIndex.Serializer.ForKeyValuePair(
+                            TinyIndex.Serializer.ForStringAsUTF8(),
+                            TinyIndex.Serializer.ForReadOnlyList(TinyIndex.Serializer.ForLong())),
+                        db =>
                         {
                             IEnumerable<KeyValuePair<long, string>> It(IEnumerable<JMDictEntry> entries)
                             {
