@@ -63,8 +63,8 @@ namespace JDict
         private static Option<DateTime> ParseTimeOpt(string time)
         {
             return time == "\\N" || time == "0000-00-00 00:00:00"
-                ? ParseTime(time).Some()
-                : Option.None<DateTime>();
+                ? Option.None<DateTime>()
+                : ParseTime(time).Some();
         }
 
         private static DateTime ParseTime(string time)
