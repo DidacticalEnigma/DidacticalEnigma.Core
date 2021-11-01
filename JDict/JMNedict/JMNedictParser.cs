@@ -180,6 +180,9 @@ namespace JDict
                         case "dei":
                             type = JMNedictType.dei; 
                             break;
+                        case "doc":
+                            type = JMNedictType.doc; 
+                            break;
                         case "ev":
                             type = JMNedictType.ev; 
                             break;
@@ -191,6 +194,9 @@ namespace JDict
                             break;
                         case "given":
                             type = JMNedictType.given; 
+                            break;
+                        case "group":
+                            type = JMNedictType.@group; 
                             break;
                         case "leg":
                             type = JMNedictType.leg; 

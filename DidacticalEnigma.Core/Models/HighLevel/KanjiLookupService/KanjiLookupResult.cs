@@ -5,6 +5,7 @@ using JetBrains.Annotations;
 
 namespace DidacticalEnigma.Core.Models.HighLevel.KanjiLookupService
 {
+    [Serializable]
     public class KanjiLookupResult
     {
         [Required] [NotNull] public string NewQuery { get; }

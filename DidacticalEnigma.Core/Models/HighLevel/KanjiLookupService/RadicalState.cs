@@ -4,6 +4,7 @@ using JetBrains.Annotations;
 
 namespace DidacticalEnigma.Core.Models.HighLevel.KanjiLookupService
 {
+    [Serializable]
     public class RadicalState
     {
         [Required] [NotNull] public string Radical { get; }

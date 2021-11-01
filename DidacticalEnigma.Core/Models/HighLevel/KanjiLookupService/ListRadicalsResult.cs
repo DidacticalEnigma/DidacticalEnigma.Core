@@ -5,6 +5,7 @@ using JetBrains.Annotations;
 
 namespace DidacticalEnigma.Core.Models.HighLevel.KanjiLookupService
 {
+    [Serializable]
     public class ListRadicalsResult
     {
         [Required] [NotNull] [ItemNotNull] public IReadOnlyCollection<string> PossibleRadicals { get; }
