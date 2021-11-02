@@ -1,5 +1,6 @@
 using Newtonsoft.Json;
 
+
 namespace JDict.ImmersionKit
 {
     public class ImmersionKitSentence
