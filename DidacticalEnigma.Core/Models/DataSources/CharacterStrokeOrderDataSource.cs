@@ -31,5 +31,7 @@ namespace DidacticalEnigma.Core.Models.DataSources
         {
             return Task.FromResult(UpdateResult.NotSupported);
         }
+        
+        public string InstanceIdentifier => null;
     }
 }

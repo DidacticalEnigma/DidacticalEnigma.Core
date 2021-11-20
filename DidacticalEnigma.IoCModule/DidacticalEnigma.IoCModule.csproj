@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <PackageVersion>0.9.1</PackageVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\DidacticalEnigma.Core\DidacticalEnigma.Core.csproj" />
+      <ProjectReference Include="..\JDict\JDict.csproj" />
+      <ProjectReference Include="..\Utility\Utility.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Gu.Inject" Version="0.3.9" />
+      <PackageReference Include="Optional" Version="4.0.0" />
+    </ItemGroup>
+
+</Project>

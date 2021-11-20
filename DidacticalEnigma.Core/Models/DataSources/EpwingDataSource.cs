@@ -20,6 +20,8 @@ namespace DidacticalEnigma.Core.Models.DataSources
             "...",
             null);
 
+        public string Revision => dict.Revision;
+
         public Task<Option<RichFormatting>> Answer(Request request, CancellationToken token)
         {
             return DictUtils.Lookup(
@@ -52,5 +54,7 @@ namespace DidacticalEnigma.Core.Models.DataSources
             this.dict = dict;
             this.kana = kana;
         }
+        
+        public string InstanceIdentifier => dict.Revision;
     }
 }

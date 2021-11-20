@@ -57,5 +57,7 @@ namespace DidacticalEnigma.Core.Models.DataSources
         {
             this.tanaka = tanaka;
         }
+        
+        public string InstanceIdentifier => null;
     }
 }

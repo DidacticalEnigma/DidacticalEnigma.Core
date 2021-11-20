@@ -56,5 +56,7 @@ namespace DidacticalEnigma.Core.Models.DataSources
         {
             this.jesc = jesc;
         }
+        
+        public string InstanceIdentifier => null;
     }
 }

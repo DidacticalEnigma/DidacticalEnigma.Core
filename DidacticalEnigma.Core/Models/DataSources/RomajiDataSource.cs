@@ -43,5 +43,7 @@ namespace DidacticalEnigma.Core.Models.DataSources
         {
             this.romaji = romaji;
         }
+        
+        public string InstanceIdentifier => null;
     }
 }

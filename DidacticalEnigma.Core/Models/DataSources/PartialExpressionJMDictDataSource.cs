@@ -64,5 +64,7 @@ namespace DidacticalEnigma.Core.Models.DataSources
         {
             this.idiomDetector = idiomDetector;
         }
+        
+        public string InstanceIdentifier => null;
     }
 }

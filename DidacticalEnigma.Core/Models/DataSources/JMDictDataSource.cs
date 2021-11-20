@@ -212,5 +212,7 @@ namespace DidacticalEnigma.Core.Models.DataSources
             this.jdict = jdict;
             this.kana = kana;
         }
+        
+        public string InstanceIdentifier => null;
     }
 }

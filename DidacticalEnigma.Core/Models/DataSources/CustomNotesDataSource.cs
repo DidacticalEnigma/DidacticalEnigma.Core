@@ -95,5 +95,7 @@ namespace DidacticalEnigma.Core.Models.DataSources
         {
             this.notesFilePath = notesFilePath;
         }
+        
+        public string InstanceIdentifier => null;
     }
 }

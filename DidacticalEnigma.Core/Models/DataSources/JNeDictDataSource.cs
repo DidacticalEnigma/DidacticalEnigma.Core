@@ -62,5 +62,7 @@ namespace DidacticalEnigma.Core.Models.DataSources
         {
             this.dict = dict;
         }
+        
+        public string InstanceIdentifier => null;
     }
 }

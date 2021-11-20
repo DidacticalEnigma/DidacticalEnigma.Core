@@ -41,6 +41,8 @@ namespace DidacticalEnigma.Core.Models.DataSources
             return Task.FromResult(UpdateResult.NotSupported);
         }
 
+        public string InstanceIdentifier => null;
+
         public AutoGlosserDataSource(IAutoGlosser autoglosser)
         {
             this.autoglosser = autoglosser;

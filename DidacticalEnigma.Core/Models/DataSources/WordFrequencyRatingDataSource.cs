@@ -57,5 +57,7 @@ namespace DidacticalEnigma.Core.Models.DataSources
             var count = words.Count;
             frequencies = words.Select((kvp, i) => new KeyValuePair<string, double>(kvp.Key, (double)(count - i + 1) / (count + 1) * 10)).ToDictionary();
         }
+        
+        public string InstanceIdentifier => null;
     }
 }

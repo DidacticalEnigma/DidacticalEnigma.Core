@@ -55,5 +55,7 @@ namespace DidacticalEnigma.Core.Models.DataSources
         {
             be = corpus;
         }
+        
+        public string InstanceIdentifier => null;
     }
 }

@@ -54,5 +54,7 @@ namespace DidacticalEnigma.Core.Models.DataSources
             this.kanji = kanji;
             this.kana = kana;
         }
+        
+        public string InstanceIdentifier => null;
     }
 }
