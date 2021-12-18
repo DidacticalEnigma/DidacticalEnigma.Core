@@ -16,7 +16,7 @@ namespace DidacticalEnigma.Core.Models.HighLevel
         public Error(
             [NotNull] string code,
             [NotNull] string message,
-            [NotNull] IReadOnlyCollection<string> context = null)
+            IReadOnlyCollection<string> context = null)
         {
             Code = code ?? throw new ArgumentNullException(nameof(code));
             Message = message ?? throw new ArgumentNullException(nameof(message));

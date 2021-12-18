@@ -23,7 +23,7 @@ namespace DidacticalEnigma.Core.Models.LanguageService
 
             bool first = true;
             var sb = new StringBuilder();
-            foreach (var (word, nextWord) in words.Zip(words.Skip(1).Concat(EnumerableExt.OfSingle(""))))
+            foreach (var (word, nextWord) in Utility.Utils.EnumerableExt.Zip(words, words.Skip(1).Concat(EnumerableExt.OfSingle(""))))
             {
                 if (!first)
                     sb.Append(" ");

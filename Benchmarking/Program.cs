@@ -7,7 +7,7 @@ namespace Benchmarking
     {
         static void Main(string[] args)
         {
-            var summary = BenchmarkRunner.Run<PartialWordLookupBenchmarks>();
+            var summary = BenchmarkRunner.Run<JMDictParsing>();
         }
     }
 }
