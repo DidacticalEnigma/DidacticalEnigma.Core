@@ -102,7 +102,7 @@ namespace AutomatedTests
             var ipadicEntries = ipadicMecab.ParseToEntries(sentence).Where(e => e.IsRegular);
             // this is to make test cases fail in case the number of expecteds is less than the number of actuals
             var nullDummyEntry = new DummyEntry();
-            foreach (var (i, e) in ipadicEntries.Zip(expectedEntries.Concat(Utility.Utils.EnumerableExt.Repeat(nullDummyEntry))))
+            foreach (var (i, e) in EnumerableExt.Zip(ipadicEntries, expectedEntries.Concat(EnumerableExt.Repeat(nullDummyEntry))))
             {
                 //Assert.AreEqual(e.ConjugatedForm, i.ConjugatedForm);
                 //Assert.AreEqual(e.Inflection, i.Inflection);

@@ -150,12 +150,16 @@ namespace DidacticalEnigma.Core.Models.LanguageService
             start = Math.Max(0, start - outOfBoundLimit);
             end = Math.Min(index.Count, end + outOfBoundLimit);
             var mid = (start + end) / 2;
-            return EnumerableExt.Range(start, end - start).Zip(index.GetIdRange(start, end))
-                .DistinctBy(kvp => kvp.Item2.Value)
-                .OrderBy(kvp => Math.Abs(kvp.Item1 - mid))
-                .Select(kvp => Rate(analyzed, kvp.Item2.Key, kvp.Item2.Value))
-                .Where(r => r.Similarity > 0)
-                .OrderByDescending(r => r.Similarity);
+            return
+                EnumerableExt.DistinctBy(
+                    EnumerableExt.Zip(
+                        EnumerableExt.Range(start, end - start),
+                        index.GetIdRange(start, end)), 
+                kvp => kvp.Item2.Value)
+                    .OrderBy(kvp => Math.Abs(kvp.Item1 - mid))
+                    .Select(kvp => Rate(analyzed, kvp.Item2.Key, kvp.Item2.Value))
+                    .Where(r => r.Similarity > 0)
+                    .OrderByDescending(r => r.Similarity);
         }
 
         // there is no reason why Corpus requires IPADIC
@@ -167,8 +171,8 @@ namespace DidacticalEnigma.Core.Models.LanguageService
         {
             this.analyzer = analyzer;
             var sentenceSerializer = Serializer.ForComposite()
-                .With(Serializer.ForStringAsUTF8())
-                .With(Serializer.ForStringAsUTF8())
+                .With(Serializer.ForStringAsUtf8())
+                .With(Serializer.ForStringAsUtf8())
                 .Create()
                 .Mapping(
                     raw => new SentencePair((string) raw[0], (string) raw[1]),
@@ -176,7 +180,7 @@ namespace DidacticalEnigma.Core.Models.LanguageService
 
             db = Database.CreateOrOpen(cachePath, Version)
                 .AddIndirectArray(sentenceSerializer, db => sentenceFactory())
-                .AddIndirectArray(Serializer.ForKeyValuePair(Serializer.ForStringAsUTF8(), Serializer.ForLong()),
+                .AddIndirectArray(Serializer.ForKeyValuePair(Serializer.ForStringAsUtf8(), Serializer.ForLong()),
                     db => CreateIndex(db.Get<SentencePair>(0).LinearScan()), kvp => kvp.Key)
                 .Build();
 

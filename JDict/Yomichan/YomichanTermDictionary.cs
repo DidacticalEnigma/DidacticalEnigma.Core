@@ -54,9 +54,9 @@ namespace JDict
         private void Init(Lazy<IZipFile> zip, string cachePath)
         {
             var headerSerializer = Serializer.ForComposite()
-                .With(Serializer.ForStringAsUTF8())
+                .With(Serializer.ForStringAsUtf8())
                 .With(Serializer.ForInt())
-                .With(Serializer.ForStringAsUTF8())
+                .With(Serializer.ForStringAsUtf8())
                 .With(Serializer.ForInt().Mapping(raw => raw != 0, b => b ? 1 : 0))
                 .Create()
                 .Mapping(raw => new YomichanDictionaryVersion()
@@ -74,14 +74,14 @@ namespace JDict
                             obj.Sequenced
                     });
             var entrySerializer = Serializer.ForComposite()
-                .With(Serializer.ForStringAsUTF8())
-                .With(Serializer.ForStringAsUTF8())
-                .With(Serializer.ForStringAsUTF8())
-                .With(Serializer.ForStringAsUTF8())
+                .With(Serializer.ForStringAsUtf8())
+                .With(Serializer.ForStringAsUtf8())
+                .With(Serializer.ForStringAsUtf8())
+                .With(Serializer.ForStringAsUtf8())
                 .With(Serializer.ForInt())
-                .With(Serializer.ForReadOnlyList(Serializer.ForStringAsUTF8()))
+                .With(Serializer.ForReadOnlyList(Serializer.ForStringAsUtf8()))
                 .With(Serializer.ForInt())
-                .With(Serializer.ForStringAsUTF8())
+                .With(Serializer.ForStringAsUtf8())
                 .Create()
                 .Mapping(
                     raw => new YomichanDictionaryEntry
@@ -108,7 +108,7 @@ namespace JDict
                     });
 
             var indexSerializer = Serializer.ForKeyValuePair(
-                Serializer.ForStringAsUTF8(),
+                Serializer.ForStringAsUtf8(),
                 Serializer.ForReadOnlyList(Serializer.ForLong()));
 
             var lazyHeaderInfo =

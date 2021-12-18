@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Async;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -58,32 +58,27 @@ namespace DidacticalEnigma.Core.Models.DataSources
             return Option.None<RichFormatting>();
         }
 
-        private IAsyncEnumerable<string> ReadParagraphs()
+        private async IAsyncEnumerable<string> ReadParagraphs()
         {
-            return new AsyncEnumerable<string>(async yield =>
+            using var reader = new StreamReader(notesFilePath);
+            var sb = new StringBuilder();
+            string line;
+            while ((line = await reader.ReadLineAsync()) != null)
             {
-                using (var reader = new StreamReader(notesFilePath))
+                if (line == "" && sb.Length != 0)
                 {
-                    var sb = new StringBuilder();
-                    string line;
-                    while ((line = await reader.ReadLineAsync()) != null)
-                    {
-                        if (line == "" && sb.Length != 0)
-                        {
-                            await yield.ReturnAsync(sb.ToString());
-                            sb.Clear();
-                            continue;
-                        }
-
-                        sb.AppendLine(line);
-                    }
-
-                    if (sb.Length != 0)
-                    {
-                        await yield.ReturnAsync(sb.ToString());
-                    }
+                    yield return sb.ToString();
+                    sb.Clear();
+                    continue;
                 }
-            });
+
+                sb.AppendLine(line);
+            }
+
+            if (sb.Length != 0)
+            {
+                yield return sb.ToString();
+            }
         }
 
         public Task<UpdateResult> UpdateLocalDataSource(CancellationToken cancellation = default)

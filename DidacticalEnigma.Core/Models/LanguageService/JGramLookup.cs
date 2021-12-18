@@ -63,7 +63,8 @@ namespace DidacticalEnigma.Core.Models.LanguageService
             start = Math.Max(0, start - outOfBoundLimit);
             end = Math.Min(entries.Count, end + outOfBoundLimit);
             var mid = (start + end) / 2;
-            return EnumerableExt.Range(start, end - start)
+
+            var resultEntries = EnumerableExt.Range(start, end - start)
                 .OrderBy(i => Math.Abs(i - mid))
                 .Select(i => index[i])
                 .Select(indexEntry =>
@@ -76,19 +77,19 @@ namespace DidacticalEnigma.Core.Models.LanguageService
                 .Values()
                 .OrderByDescending(r => CommonPrefixLength(r.indexKey, key))
                 .Where(r => CommonPrefixLength(r.indexKey, key) != 0)
-                .Select(r => r.entry)
-                .DistinctBy(entry => entry.Id);
+                .Select(r => r.entry);
+            return EnumerableExt.DistinctBy(resultEntries, entry => entry.Id);
         }
 
         public JGramLookup(string jgramPath, string jgramLookupPath, string cachePath)
         {
             var entrySerializer = Serializer.ForComposite()
                 .With(Serializer.ForLong())
-                .With(Serializer.ForStringAsUTF8())
-                .With(Serializer.ForStringAsUTF8())
-                .With(Serializer.ForStringAsUTF8())
-                .With(Serializer.ForStringAsUTF8())
-                .With(Serializer.ForStringAsUTF8())
+                .With(Serializer.ForStringAsUtf8())
+                .With(Serializer.ForStringAsUtf8())
+                .With(Serializer.ForStringAsUtf8())
+                .With(Serializer.ForStringAsUtf8())
+                .With(Serializer.ForStringAsUtf8())
                 .Create()
                 .Mapping(raw => new JGram.Entry(
                         (long)raw[0],
@@ -108,7 +109,7 @@ namespace DidacticalEnigma.Core.Models.LanguageService
                     });
 
             var indexSerializer = Serializer.ForKeyValuePair(
-                Serializer.ForStringAsUTF8(),
+                Serializer.ForStringAsUtf8(),
                 Serializer.ForLong());
 
             db = Database.CreateOrOpen(cachePath, Version)

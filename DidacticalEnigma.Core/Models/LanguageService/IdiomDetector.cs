@@ -159,13 +159,17 @@ namespace DidacticalEnigma.Core.Models.LanguageService
             start = Math.Max(0, start - outOfBoundLimit);
             end = Math.Min(entries.Count, end + outOfBoundLimit);
             var mid = (start + end)/2;
-            return EnumerableExt.Range(start, end - start).Zip(entries.GetIdRange(start, end))
-                .OrderBy(kvp => Math.Abs(kvp.Item1 - mid))
-                .Select(kvp => Rate(analyzed, kvp.Item2.Key, kvp.Item2.Value))
-                .Values()
-                .Where(r => r.Similarity > 0)
-                .OrderByDescending(r => r.Similarity)
-                .DistinctBy(r => r.DictionaryEntry.SequenceNumber);
+            var resultEntries =
+                EnumerableExt.Zip(
+                        EnumerableExt.Range(start, end - start),
+                        entries.GetIdRange(start, end))
+                    .OrderBy(kvp => Math.Abs(kvp.Item1 - mid))
+                    .Select(kvp => Rate(analyzed, kvp.Item2.Key, kvp.Item2.Value))
+                    .Values()
+                    .Where(r => r.Similarity > 0)
+                    .OrderByDescending(r => r.Similarity);
+            return 
+                EnumerableExt.DistinctBy(resultEntries, r => r.DictionaryEntry.SequenceNumber);
         }
 
         public IdiomDetector(
@@ -176,7 +180,7 @@ namespace DidacticalEnigma.Core.Models.LanguageService
             this.jmDict = jmDict;
             this.analyzer = analyzer;
             db = Database.CreateOrOpen(cachePath, Version)
-                .AddIndirectArray(Serializer.ForKeyValuePair(Serializer.ForStringAsUTF8(), Serializer.ForLong()),
+                .AddIndirectArray(Serializer.ForKeyValuePair(Serializer.ForStringAsUtf8(), Serializer.ForLong()),
                     CreateEntries, kvp => kvp.Key)
                 .Build();
 

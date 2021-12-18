@@ -32,11 +32,11 @@ namespace JDict
         {
             var entrySerializer = Serializer.ForComposite()
                 .With(Serializer.ForLong())
-                .With(Serializer.ForReadOnlyList(Serializer.ForStringAsUTF8()))
-                .With(Serializer.ForReadOnlyList(Serializer.ForStringAsUTF8()))
+                .With(Serializer.ForReadOnlyList(Serializer.ForStringAsUtf8()))
+                .With(Serializer.ForReadOnlyList(Serializer.ForStringAsUtf8()))
                 .With(Serializer.ForReadOnlyList(Serializer.ForComposite()
                     .With(Serializer.ForReadOnlyList(Serializer.ForEnum<JMNedictType>()))
-                    .With(Serializer.ForReadOnlyList(Serializer.ForStringAsUTF8()))
+                    .With(Serializer.ForReadOnlyList(Serializer.ForStringAsUtf8()))
                     .Create()
                     .Mapping(
                         raw => new JnedictTranslation(
@@ -69,7 +69,7 @@ namespace JDict
                         entrySerializer,
                         db => parser.ReadRemainingToEnd())
                     .AddIndirectArray(
-                        Serializer.ForKeyValuePair(Serializer.ForStringAsUTF8(),
+                        Serializer.ForKeyValuePair(Serializer.ForStringAsUtf8(),
                             Serializer.ForReadOnlyList(Serializer.ForLong())), db =>
                         {
                             IEnumerable<KeyValuePair<long, string>> It(IEnumerable<JnedictEntry> entries)

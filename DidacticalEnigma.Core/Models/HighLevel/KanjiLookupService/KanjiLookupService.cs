@@ -72,8 +72,7 @@ namespace DidacticalEnigma.Core.Models.HighLevel.KanjiLookupService
 
             // get corresponding radicals
             var radicalSearchResults = radicalSearcher.Search(query);
-            var usedRadicals = radicalSearchResults
-                .DistinctBy(r => r.Text)
+            var usedRadicals = EnumerableExt.DistinctBy(radicalSearchResults, r => r.Text)
                 .Select(r => new KeyValuePair<string, string>(r.Text, r.Radical.ToString()));
 
             // select

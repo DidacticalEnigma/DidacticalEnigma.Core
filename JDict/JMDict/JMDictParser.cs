@@ -776,9 +776,10 @@ namespace JDict
             {
                 if (xmlReader.NodeType == XmlNodeType.DocumentType)
                 {
-                    undoEntityExpansionDictionary = new DualDictionary<string, string>(XmlEntities
-                        .ParseJMDictEntities(xmlReader.Value)
-                        .DistinctBy(kvp => kvp.Key));
+                    undoEntityExpansionDictionary = new DualDictionary<string, string>(
+                        EnumerableExt.DistinctBy(
+                            XmlEntities.ParseJMDictEntities(xmlReader.Value),
+                            kvp => kvp.Key));
                 }
 
                 if (xmlReader.NodeType == XmlNodeType.Comment)

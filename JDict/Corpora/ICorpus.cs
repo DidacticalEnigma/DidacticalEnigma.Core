@@ -1,4 +1,3 @@
-using System.Collections.Async;
 using System.Collections.Generic;
 
 namespace JDict

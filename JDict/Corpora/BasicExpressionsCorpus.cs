@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Async;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Text;
 
@@ -20,29 +18,22 @@ namespace JDict
 
         private static IEnumerable<SentencePair> Sentences(Func<TextReader> readerFactory)
         {
-            using (var reader = readerFactory())
+            using var reader = readerFactory();
+            string line;
+            while ((line = reader.ReadLine()) != null)
             {
-                string line;
-                while ((line = reader.ReadLine()) != null)
-                {
-                    yield return SentenceFromLine(line);
-                }
+                yield return SentenceFromLine(line);
             }
         }
 
-        private static IAsyncEnumerable<SentencePair> SentencesAsync(Func<TextReader> readerFactory)
+        private static async IAsyncEnumerable<SentencePair> SentencesAsync(Func<TextReader> readerFactory)
         {
-            return new AsyncEnumerable<SentencePair>(async yield =>
+            using var reader = readerFactory();
+            string line;
+            while ((line = await reader.ReadLineAsync()) != null)
             {
-                using (var reader = readerFactory())
-                {
-                    string line;
-                    while ((line = await reader.ReadLineAsync()) != null)
-                    {
-                        await yield.ReturnAsync(SentenceFromLine(line));
-                    }
-                }
-            });
+                yield return SentenceFromLine(line);
+            }
         }
 
         private readonly Encoding encoding;

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Async;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -12,41 +11,34 @@ namespace JDict
     {
         private IEnumerable<SentencePair> Sentences(Func<string, TextReader> readerFactory)
         {
-            using (var readerJp = readerFactory(pathJp))
-            using (var readerEn = readerFactory(pathEn))
+            using var readerJp = readerFactory(pathJp);
+            using var readerEn = readerFactory(pathEn);
+            while (true)
             {
-                while (true)
-                {
-                    string lineJp;
-                    if ((lineJp = readerJp.ReadLine()) == null)
-                        break;
-                    string lineEn;
-                    if ((lineEn = readerEn.ReadLine()) == null)
-                        break;
-                    yield return new SentencePair(lineJp, lineEn);
-                }
+                string lineJp;
+                if ((lineJp = readerJp.ReadLine()) == null)
+                    break;
+                string lineEn;
+                if ((lineEn = readerEn.ReadLine()) == null)
+                    break;
+                yield return new SentencePair(lineJp, lineEn);
             }
         }
 
-        private IAsyncEnumerable<SentencePair> SentencesAsync(Func<string, TextReader> readerFactory)
+        private async IAsyncEnumerable<SentencePair> SentencesAsync(Func<string, TextReader> readerFactory)
         {
-            return new AsyncEnumerable<SentencePair>(async yield =>
+            using var readerJp = readerFactory(pathJp);
+            using var readerEn = readerFactory(pathEn);
+            while (true)
             {
-                using (var readerJp = readerFactory(pathJp))
-                using (var readerEn = readerFactory(pathEn))
-                {
-                    while (true)
-                    {
-                        string lineJp;
-                        if ((lineJp = await readerJp.ReadLineAsync()) == null)
-                            break;
-                        string lineEn;
-                        if ((lineEn = await readerEn.ReadLineAsync()) == null)
-                            break;
-                        await yield.ReturnAsync(new SentencePair(lineJp, lineEn));
-                    }
-                }
-            });
+                string lineJp;
+                if ((lineJp = await readerJp.ReadLineAsync()) == null)
+                    break;
+                string lineEn;
+                if ((lineEn = await readerEn.ReadLineAsync()) == null)
+                    break;
+                yield return new SentencePair(lineJp, lineEn);
+            }
         }
 
         private readonly Encoding encoding;

@@ -66,7 +66,7 @@ namespace AutomatedTests
         public void Basic3()
         {
             var entries = idiomDetector.Detect("明日").ToList();
-            Assert.True(entries.DistinctBy(e => e.DictionaryEntry.SequenceNumber).Count() == entries.Count);
+            Assert.True(EnumerableExt.DistinctBy(entries, e => e.DictionaryEntry.SequenceNumber).Count() == entries.Count);
         }
 
         [Test]

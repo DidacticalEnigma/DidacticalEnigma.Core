@@ -26,19 +26,19 @@ namespace JDict
 
         private JMDictLookup Init(Stream stream, string cache)
         {
-            var priorityTagSerializer = Serializer.ForStringAsUTF8().Mapping(
+            var priorityTagSerializer = Serializer.ForStringAsUtf8().Mapping(
                 raw => PriorityTag.FromString(raw),
                 pTag => pTag.Map(p => p.ToString()).ValueOr(""));
 
-            var crossReferenceSerializer = Serializer.ForStringAsUTF8().Mapping(
+            var crossReferenceSerializer = Serializer.ForStringAsUtf8().Mapping(
                 raw => EdictCrossReference.Parse(raw),
                 obj => obj.ToString());
 
             var loanSourceSerializer = Serializer.ForComposite()
-                .With(Serializer.ForStringAsUTF8())
+                .With(Serializer.ForStringAsUtf8())
                 .With(SerializerExt.ForBool())
                 .With(Serializer.ForEnum<EdictLoanSourceType>())
-                .With(SerializerExt.ForOption(Serializer.ForStringAsUTF8()))
+                .With(SerializerExt.ForOption(Serializer.ForStringAsUtf8()))
                 .Create()
                 .Mapping(
                     raw => new EdictLoanSource(
@@ -55,9 +55,9 @@ namespace JDict
                     });
 
             var kanjiSerializer = Serializer.ForComposite()
-                .With(Serializer.ForStringAsUTF8())
+                .With(Serializer.ForStringAsUtf8())
                 .With(SerializerExt.ForBool())
-                .With(Serializer.ForReadOnlyCollection(Serializer.ForStringAsUTF8()))
+                .With(Serializer.ForReadOnlyCollection(Serializer.ForStringAsUtf8()))
                 .With(Serializer.ForReadOnlyCollection(Serializer.ForEnum<EdictReadingInformation>()))
                 .With(Serializer.ForReadOnlyCollection(priorityTagSerializer))
                 .Create()
@@ -78,7 +78,7 @@ namespace JDict
                     });
 
             var readingSerializer = Serializer.ForComposite()
-                .With(Serializer.ForStringAsUTF8())
+                .With(Serializer.ForStringAsUtf8())
                 .With(Serializer.ForReadOnlyCollection(Serializer.ForEnum<EdictKanjiInformation>()))
                 .With(Serializer.ForReadOnlyCollection(priorityTagSerializer))
                 .Create()
@@ -98,12 +98,12 @@ namespace JDict
                 .With(SerializerExt.ForOption(Serializer.ForEnum<EdictPartOfSpeech>()))
                 .With(Serializer.ForReadOnlyCollection(Serializer.ForEnum<EdictPartOfSpeech>()))
                 .With(Serializer.ForReadOnlyCollection(Serializer.ForEnum<EdictDialect>()))
-                .With(Serializer.ForReadOnlyCollection(Serializer.ForStringAsUTF8()))
-                .With(Serializer.ForReadOnlyCollection(Serializer.ForStringAsUTF8()))
+                .With(Serializer.ForReadOnlyCollection(Serializer.ForStringAsUtf8()))
+                .With(Serializer.ForReadOnlyCollection(Serializer.ForStringAsUtf8()))
                 .With(Serializer.ForReadOnlyCollection(Serializer.ForEnum<EdictField>()))
                 .With(Serializer.ForReadOnlyCollection(Serializer.ForEnum<EdictMisc>()))
-                .With(Serializer.ForReadOnlyCollection(Serializer.ForStringAsUTF8()))
-                .With(Serializer.ForReadOnlyCollection(Serializer.ForStringAsUTF8()))
+                .With(Serializer.ForReadOnlyCollection(Serializer.ForStringAsUtf8()))
+                .With(Serializer.ForReadOnlyCollection(Serializer.ForStringAsUtf8()))
                 .With(Serializer.ForReadOnlyCollection(loanSourceSerializer))
                 .With(Serializer.ForReadOnlyCollection(crossReferenceSerializer))
                 .With(Serializer.ForReadOnlyCollection(crossReferenceSerializer))
@@ -165,7 +165,7 @@ namespace JDict
                         x => x.SequenceNumber)
                     .AddIndirectArray(
                         TinyIndex.Serializer.ForKeyValuePair(
-                            TinyIndex.Serializer.ForStringAsUTF8(),
+                            TinyIndex.Serializer.ForStringAsUtf8(),
                             TinyIndex.Serializer.ForReadOnlyList(TinyIndex.Serializer.ForLong())),
                         db =>
                         {
@@ -192,7 +192,7 @@ namespace JDict
                         },
                         x => x.Key, StringComparer.Ordinal)
                     .AddIndirectArray(
-                        Serializer.ForKeyValuePair(Serializer.ForStringAsUTF8(), Serializer.ForStringAsUTF8()),
+                        Serializer.ForKeyValuePair(Serializer.ForStringAsUtf8(), Serializer.ForStringAsUtf8()),
                         db => jmdictParser.FriendlyNames,
                         x => x.Key, StringComparer.Ordinal)
                     .Build();

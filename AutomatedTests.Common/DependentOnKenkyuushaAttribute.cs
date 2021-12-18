@@ -22,7 +22,7 @@ namespace AutomatedTests
 
             byte[] hash;
             using (var file = File.OpenRead(TestDataPaths.Kenkyusha5))
-            using (var sha = new SHA256Managed())
+            using (var sha = SHA256.Create())
             {
                 hash = sha.ComputeHash(file);
             }
