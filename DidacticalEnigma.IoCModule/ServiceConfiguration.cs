@@ -142,6 +142,7 @@ namespace DidacticalEnigma.IoCModule
                 using (var reader = File.OpenText(Path.Combine(dataDirectory, "character", "radkfile1_plus_2_utf8")))
                     return new KanjiRadicalLookup(Radkfile.Parse(reader), get.Get<KanjiDict>());
             });
+            kernel.Bind(get => new DisclaimersGetter(Path.Combine(dataDirectory, @"about.txt")));
             kernel.Bind<IJGramLookup, JGramLookup>();
             kernel.Bind(get => new JGramLookup(
                 Path.Combine(dataDirectory, "dictionaries", "jgram"),
