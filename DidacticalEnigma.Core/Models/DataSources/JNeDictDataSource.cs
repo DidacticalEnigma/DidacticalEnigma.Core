@@ -35,9 +35,9 @@ namespace DidacticalEnigma.Core.Models.DataSources
                     return new[]
                     {
                         new Text("\n"),
-                        new Text(string.Join("/", t.Type.Select(type => type.ToLongString()))),
+                        new Text(string.Join("/\u200B", t.Type.Select(type => type.ToLongString()))),
                         new Text("\n"),
-                        new Text(string.Join("/", t.Translation)),
+                        new Text(string.Join("/\u200B", t.Translation)),
                     };
                 }))));
             }
