@@ -18,7 +18,7 @@ namespace DidacticalEnigma.IoCModule
 {
     public static class ServiceConfiguration
     {
-        public static Kernel BindDidacticalEnigmaCoreServices(
+        public static ICollection<Func<IReadOnlyKernel, IDataSource>> BindDidacticalEnigmaCoreServices(
             this Kernel kernel,
             string dataDirectory,
             string cacheDirectory)
@@ -94,26 +94,34 @@ namespace DidacticalEnigma.IoCModule
             kernel.Bind(get => new PartialWordLookupJMDictDataSource(get.Get<PartialWordLookup>(), get.Get<FrequencyList>()));
             kernel.Bind(get => new JESCDataSource(get.Get<JESC>()));
             kernel.Bind(get => new RomajiDataSource(get.Get<IRomaji>()));
-            kernel.Bind(get => new IDataSource[]
-            {
-                get.Get<CharacterDataSource>(),
-                get.Get<CharacterStrokeOrderDataSource>(),
-                get.Get<JMDictDataSource>(),
-                get.Get<JNeDictDataSource>(),
-                get.Get<VerbConjugationDataSource>(),
-                get.Get<WordFrequencyRatingDataSource>(),
-                get.Get<PartialExpressionJMDictDataSource>(),
-                get.Get<JGramDataSource>(),
-                get.Get<AutoGlosserDataSource>(),
-                get.Get<CustomNotesDataSource>(),
-                get.Get<TanakaCorpusFastDataSource>(),
-                get.Get<TanakaCorpusDataSource>(),
-                get.Get<BasicExpressionCorpusDataSource>(),
-                get.Get<PartialWordLookupJMDictDataSource>(),
-                get.Get<JESCDataSource>(),
-                get.Get<RomajiDataSource>(),
-            }.Concat(get.Get<EpwingDictionaries>().Dictionaries
-                .Select(dict => new EpwingDataSource(dict, get.Get<IKanaProperties>()))));
+
+            var epwingDictionaries = CreateEpwing(dataDirectory, cacheDirectory);
+            
+            ICollection<Func<IReadOnlyKernel, IDataSource>> dataSourceCollection =
+                new List<Func<IReadOnlyKernel, IDataSource>>(new Func<IReadOnlyKernel, IDataSource>[]
+                {
+                    get => get.Get<CharacterDataSource>(),
+                    get => get.Get<CharacterStrokeOrderDataSource>(),
+                    get => get.Get<JMDictDataSource>(),
+                    get => get.Get<JNeDictDataSource>(),
+                    get => get.Get<VerbConjugationDataSource>(),
+                    get => get.Get<WordFrequencyRatingDataSource>(),
+                    get => get.Get<PartialExpressionJMDictDataSource>(),
+                    get => get.Get<JGramDataSource>(),
+                    get => get.Get<AutoGlosserDataSource>(),
+                    get => get.Get<CustomNotesDataSource>(),
+                    get => get.Get<TanakaCorpusFastDataSource>(),
+                    get => get.Get<TanakaCorpusDataSource>(),
+                    get => get.Get<BasicExpressionCorpusDataSource>(),
+                    get => get.Get<PartialWordLookupJMDictDataSource>(),
+                    get => get.Get<JESCDataSource>(),
+                    get => get.Get<RomajiDataSource>(),
+                }.Concat(epwingDictionaries.Dictionaries
+                    .Select(dict => new Func<IReadOnlyKernel, IDataSource>(
+                        get => new EpwingDataSource(dict, get.Get<IKanaProperties>())))));
+            
+            kernel.Bind<IEnumerable<IDataSource>>(get => dataSourceCollection.Select(factory => factory(get)));
+            
             kernel.Bind<IKanaProperties, KanaProperties2>();
             kernel.Bind(get =>
                 new KanaProperties2(Path.Combine(dataDirectory, "character", "kana.txt"), Encoding.UTF8));
@@ -126,7 +134,6 @@ namespace DidacticalEnigma.IoCModule
                     get.Get<KanaProperties2>(),
                     get.Get<EasilyConfusedKana>(),
                     get.Get<SimilarKanji>()));
-            kernel.Bind(get => CreateEpwing(dataDirectory, cacheDirectory));
             kernel.Bind(get => new IdiomDetector(get.Get<JMDictLookup>(),
                 get.Get<IMorphologicalAnalyzer<IpadicEntry>>(), Path.Combine(cacheDirectory, "dictionaries", "idioms.cache")));
             kernel.Bind<IKanjiLookupService, KanjiLookupService>();
@@ -160,7 +167,7 @@ namespace DidacticalEnigma.IoCModule
                 get.Get<IMorphologicalAnalyzer<IpadicEntry>>(), Path.Combine(cacheDirectory, "corpora", "tanaka.cache")));
             kernel.Bind(get => new DataSourceDispatcher(get.Get<IEnumerable<IDataSource>>()));
             kernel.Bind(get => new XmlRichFormattingRenderer());
-            return kernel;
+            return dataSourceCollection;
         }
         
         private static IReadOnlyDictionary<CodePoint, string> CreateTextRadicalMappings(IEnumerable<CodePoint> radicals, IReadOnlyDictionary<int, int> remapper)
