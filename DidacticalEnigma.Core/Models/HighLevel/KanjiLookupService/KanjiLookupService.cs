@@ -131,9 +131,9 @@ namespace DidacticalEnigma.Core.Models.HighLevel.KanjiLookupService
                         {
                             IReadOnlyCollection<string> queryNames = new[]
                             {
-                                kanjiAliveEntry.Meanings,
                                 kanjiAliveEntry.JapaneseReadings,
-                                kanjiAliveEntry.RomajiReadings
+                                kanjiAliveEntry.RomajiReadings,
+                                kanjiAliveEntry.Meanings,
                             }.SelectMany(x => x).ToList();
                             return queryNames;
                         }).ValueOr(Array.Empty<string>())))
