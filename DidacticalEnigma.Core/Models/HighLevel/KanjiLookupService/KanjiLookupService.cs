@@ -2,29 +2,114 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using DidacticalEnigma.Core.Models.LanguageService;
+using JDict;
 using Optional;
+using Optional.Collections;
 using Optional.Unsafe;
 using Utility.Utils;
+using Radical = JDict.Radical;
 
 namespace DidacticalEnigma.Core.Models.HighLevel.KanjiLookupService
 {
+    
+#nullable enable
+    internal static class ProjectingEqualityComparer<TIn>
+        where TIn : notnull
+    {
+        public static IEqualityComparer<TIn> Create<TOut>(
+            Func<TIn, TOut> projection,
+            IEqualityComparer<TOut>? comparer = null)
+            where TOut : notnull
+        {
+            return new ProjectingEqualityComparer<TIn, TOut>(projection, comparer);
+        }
+    }
+    
+    internal class ProjectingEqualityComparer<TIn, TOut> : IEqualityComparer<TIn>
+        where TIn : notnull
+        where TOut : notnull
+    {
+        private readonly Func<TIn, TOut> projection;
+        private readonly IEqualityComparer<TOut> comparer;
+
+        public ProjectingEqualityComparer(
+            Func<TIn, TOut> projection,
+            IEqualityComparer<TOut>? comparer = null)
+        {
+            this.projection = projection;
+            this.comparer = comparer ?? EqualityComparer<TOut>.Default;
+        }
+        
+        public bool Equals(TIn? x, TIn? y)
+        {
+            if (x is null && y is null)
+            {
+                return true;
+            }
+
+            if (x is null && y is not null)
+            {
+                return comparer.Equals(default(TOut?), projection(y));
+            }
+            
+            if (x is not null && y is null)
+            {
+                return comparer.Equals(projection(x), default(TOut?));
+            }
+
+            if (x is not null && y is not null)
+            {
+                return comparer.Equals(projection(x), projection(y));
+            }
+
+            throw new InvalidOperationException();
+        }
+
+        public int GetHashCode(TIn obj)
+        {
+            return comparer.GetHashCode(projection(obj));
+        }
+    }
+#nullable restore
+
     public class KanjiLookupService : IKanjiLookupService
     {
         private readonly IKanjiRadicalLookup radicalLookup;
         private readonly IRadicalSearcher radicalSearcher;
         private readonly IKanjiProperties kanjiProperties;
+        private readonly IReadOnlyDictionary<CodePoint, KanjiAliveJapaneseRadicalInformation.Entry> kanjiAliveInfo;
         private readonly IReadOnlyDictionary<CodePoint, string> textForms;
 
         public KanjiLookupService(
             IKanjiRadicalLookup radicalLookup,
             IRadicalSearcher radicalSearcher,
             IKanjiProperties kanjiProperties,
+            KanjiAliveJapaneseRadicalInformation kanjiAliveInfo,
+            RadkfileKanjiAliveCorrelator correlator,
             IReadOnlyDictionary<CodePoint, string> textForms = null)
         {
             this.radicalLookup = radicalLookup;
             this.radicalSearcher = radicalSearcher;
             this.kanjiProperties = kanjiProperties;
+            this.kanjiAliveInfo = CreateKanjiAliveMapping(
+                radicalLookup.AllRadicals,
+                kanjiAliveInfo,
+                correlator);
             this.textForms = textForms;
+        }
+
+        private static IReadOnlyDictionary<CodePoint, KanjiAliveJapaneseRadicalInformation.Entry> CreateKanjiAliveMapping(
+            IEnumerable<CodePoint> radicals,
+            KanjiAliveJapaneseRadicalInformation kanjiAliveInfo,
+            RadkfileKanjiAliveCorrelator correlator)
+        {
+            return new Dictionary<CodePoint, KanjiAliveJapaneseRadicalInformation.Entry>(
+                radicals
+                    .Join(
+                        kanjiAliveInfo.Where(e => e.StrokeCount.HasValue),
+                        radical => correlator.GetValueOrNone(radical.Utf32).ValueOr(0),
+                        radicalInfo => char.ConvertToUtf32(radicalInfo.Literal, 0),
+                        KeyValuePair.Create));
         }
 
         public Option<ListRadicalsResult, Error> ListRadicals()
@@ -41,7 +126,17 @@ namespace DidacticalEnigma.Core.Models.HighLevel.KanjiLookupService
                     (c, r) => new ExtendedRadicalInformation(
                         r.ToString(),
                         r.StrokeCount,
-                        textForms != null ? textForms[c] : r.ToString()))
+                        textForms != null ? textForms[c] : r.ToString(),
+                        this.kanjiAliveInfo.GetValueOrNone(c).Map(kanjiAliveEntry =>
+                        {
+                            IReadOnlyCollection<string> queryNames = new[]
+                            {
+                                kanjiAliveEntry.Meanings,
+                                kanjiAliveEntry.JapaneseReadings,
+                                kanjiAliveEntry.RomajiReadings
+                            }.SelectMany(x => x).ToList();
+                            return queryNames;
+                        }).ValueOr(Array.Empty<string>())))
                     .ToList(),
                 sortingCriteria: radicalLookup.SortingCriteria
                     .Select(r => r.Description)

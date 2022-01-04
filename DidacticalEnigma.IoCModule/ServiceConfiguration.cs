@@ -141,6 +141,8 @@ namespace DidacticalEnigma.IoCModule
                 get.Get<KanjiRadicalLookup>(),
                 get.Get<IRadicalSearcher>(),
                 get.Get<IKanjiProperties>(),
+                get.Get<KanjiAliveJapaneseRadicalInformation>(),
+                get.Get<RadkfileKanjiAliveCorrelator>(),
                 CreateTextRadicalMappings(get.Get<KanjiRadicalLookup>().AllRadicals, get.Get<RadkfileKanjiAliveCorrelator>())));
             kernel.Bind(get => new PartialWordLookup(get.Get<JMDictLookup>(), get.Get<IRadicalSearcher>(),
                 get.Get<KanjiRadicalLookup>()));
@@ -161,12 +163,15 @@ namespace DidacticalEnigma.IoCModule
             kernel.Bind<IRadicalSearcher, RadicalSearcher>();
             kernel.Bind(get => new RadicalSearcher(
                 get.Get<KanjiRadicalLookup>().AllRadicals,
-                KanjiAliveJapaneseRadicalInformation.Parse(Path.Combine(dataDirectory, "character", "japanese-radicals.csv")),
+                get.Get<KanjiAliveJapaneseRadicalInformation>(),
                 get.Get<RadkfileKanjiAliveCorrelator>()));
             kernel.Bind(get => new Corpus(get.Get<Tanaka>().AllSentences,
                 get.Get<IMorphologicalAnalyzer<IpadicEntry>>(), Path.Combine(cacheDirectory, "corpora", "tanaka.cache")));
             kernel.Bind(get => new DataSourceDispatcher(get.Get<IEnumerable<IDataSource>>()));
             kernel.Bind(get => new XmlRichFormattingRenderer());
+            kernel.Bind(get => new KanjiAliveJapaneseRadicalInformation(
+                KanjiAliveJapaneseRadicalInformation.Parse(
+                    Path.Combine(dataDirectory, "character", "japanese-radicals.csv"))));
             return dataSourceCollection;
         }
         

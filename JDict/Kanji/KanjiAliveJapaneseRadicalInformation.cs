@@ -1,11 +1,20 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
 namespace JDict
 {
-    public class KanjiAliveJapaneseRadicalInformation
+    public class KanjiAliveJapaneseRadicalInformation : IReadOnlyList<KanjiAliveJapaneseRadicalInformation.Entry>
     {
+        private readonly List<Entry> entries;
+
+        public KanjiAliveJapaneseRadicalInformation(
+            IEnumerable<KanjiAliveJapaneseRadicalInformation.Entry> entries)
+        {
+            this.entries = entries.ToList();
+        }
+
         public class Entry
         {
             public int? StrokeCount { get; }
@@ -126,5 +135,19 @@ namespace JDict
                 }
             }
         }
+
+        public IEnumerator<Entry> GetEnumerator()
+        {
+            return entries.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return ((IEnumerable)entries).GetEnumerator();
+        }
+
+        public int Count => entries.Count;
+
+        public Entry this[int index] => entries[index];
     }
 }
