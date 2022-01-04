@@ -103,13 +103,13 @@ namespace DidacticalEnigma.Core.Models.HighLevel.KanjiLookupService
             KanjiAliveJapaneseRadicalInformation kanjiAliveInfo,
             RadkfileKanjiAliveCorrelator correlator)
         {
-            return new Dictionary<CodePoint, KanjiAliveJapaneseRadicalInformation.Entry>(
-                radicals
-                    .Join(
-                        kanjiAliveInfo.Where(e => e.StrokeCount.HasValue),
-                        radical => correlator.GetValueOrNone(radical.Utf32).ValueOr(0),
-                        radicalInfo => char.ConvertToUtf32(radicalInfo.Literal, 0),
-                        KeyValuePair.Create));
+            return radicals
+                .Join(
+                    kanjiAliveInfo.Where(e => e.StrokeCount.HasValue),
+                    radical => correlator.GetValueOrNone(radical.Utf32).ValueOr(0),
+                    radicalInfo => char.ConvertToUtf32(radicalInfo.Literal, 0),
+                    KeyValuePair.Create)
+                .ToDictionary((key, leftValue, rightValue) => leftValue);
         }
 
         public Option<ListRadicalsResult, Error> ListRadicals()
