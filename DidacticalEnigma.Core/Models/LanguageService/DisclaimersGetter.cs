@@ -21,7 +21,6 @@ public class DisclaimersGetter
 
     public string GetVersion()
     {
-        return FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location)
-            .ProductVersion;
+        return Assembly.GetEntryAssembly()?.GetName().Version?.ToString();
     }
 }
