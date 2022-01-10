@@ -24,32 +24,29 @@ namespace DidacticalEnigma.Core.Models
             this.kanaProperties = kanaProperties;
         }
 
-        public IEnumerable<IEnumerable<WordInfo>> BreakIntoSentences(string input)
+        public IEnumerable<WordInfo> BreakIntoWords(string input)
         {
-            if (input.Trim() == "")
-                return Enumerable.Empty<IEnumerable<WordInfo>>();
-            return input.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None)
-                .Select(line =>
+            if (string.IsNullOrWhiteSpace(input))
+                return Enumerable.Empty<WordInfo>();
+
+            return analyzer.ParseToEntries(input)
+                .Where(a => a.IsRegular)
+                .Select(word =>
                 {
-                    return analyzer.ParseToEntries(line)
-                        .Where(a => a.IsRegular)
-                        .Select(word =>
-                        {
-                            var reading = word.Reading ?? 
-                                lookup.Lookup(word.DictionaryForm ?? word.SurfaceForm)?.FirstOrDefault()
-                                    ?.ReadingEntries.First().Reading;
-                            return new WordInfo(
-                                word.SurfaceForm,
-                                word.PartOfSpeech,
-                                word.DictionaryForm,
-                                word.GetPartOfSpeechInfo().Contains(PartOfSpeechInfo.Pronoun)
-                                    ? Option.Some(EdictPartOfSpeech.pn)
-                                    : word.Type,
-                                reading,
-                                word is UnidicEntry unidicEntry
-                                    ? unidicEntry.DictionaryFormReading
-                                    : null);
-                        });
+                    var reading = word.Reading ??
+                                  lookup.Lookup(word.DictionaryForm ?? word.SurfaceForm)?.FirstOrDefault()
+                                      ?.ReadingEntries.First().Reading;
+                    return new WordInfo(
+                        word.SurfaceForm,
+                        word.PartOfSpeech,
+                        word.DictionaryForm,
+                        word.GetPartOfSpeechInfo().Contains(PartOfSpeechInfo.Pronoun)
+                            ? Option.Some(EdictPartOfSpeech.pn)
+                            : word.Type,
+                        reading,
+                        word is UnidicEntry unidicEntry
+                            ? unidicEntry.DictionaryFormReading
+                            : null);
                 });
         }
     }

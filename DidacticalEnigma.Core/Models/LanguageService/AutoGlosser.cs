@@ -75,8 +75,7 @@ namespace DidacticalEnigma.Core.Models.LanguageService
 
         public IEnumerable<AutoGlosserNote> Gloss(string inputText)
         {
-            var words = parser.BreakIntoSentences(inputText)
-                .SelectMany(x => x)
+            var words = parser.BreakIntoWords(inputText)
                 .ToList();
 
             var glosses = new List<AutoGlosserNote>();
