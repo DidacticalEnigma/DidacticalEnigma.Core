@@ -81,6 +81,7 @@ namespace DidacticalEnigma.IoCModule
             kernel.Bind(get => new CharacterDataSource(get.Get<IKanjiProperties>(), get.Get<IKanaProperties>()));
             kernel.Bind(get => new CharacterStrokeOrderDataSource());
             kernel.Bind(get => new JMDictDataSource(get.Get<JMDictLookup>(), get.Get<IKanaProperties>()));
+            kernel.Bind(get => new JMDictCompactDataSource(get.Get<JMDictLookup>(), get.Get<IKanaProperties>()));
             kernel.Bind(get => new JNeDictDataSource(get.Get<JMNedictLookup>()));
             kernel.Bind(get => new VerbConjugationDataSource(get.Get<JMDictLookup>()));
             kernel.Bind(get => new WordFrequencyRatingDataSource(get.Get<FrequencyList>()));
@@ -104,6 +105,7 @@ namespace DidacticalEnigma.IoCModule
                     get => get.Get<CharacterStrokeOrderDataSource>(),
                     get => get.Get<JMDictDataSource>(),
                     get => get.Get<JNeDictDataSource>(),
+                    get => get.Get<JMDictCompactDataSource>(),
                     get => get.Get<VerbConjugationDataSource>(),
                     get => get.Get<WordFrequencyRatingDataSource>(),
                     get => get.Get<PartialExpressionJMDictDataSource>(),
