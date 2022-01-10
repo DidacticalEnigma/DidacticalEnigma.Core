@@ -45,7 +45,8 @@ namespace AutomatedTests
                     SurfaceForm = "楽しかっ",
                     DictionaryForm = "楽しい",
                     Pronunciation = "タノシカッ",
-                    Reading = "タノシカッ"
+                    Reading = "タノシカッ",
+                    DictionaryFormReading = "タノシイ"
                 },
                 new DummyEntry
                 {
@@ -149,6 +150,7 @@ namespace AutomatedTests
     public class DummyEntry : IEntry
     {
         private IEnumerable<PartOfSpeechInfo> partOfSpeechInfo;
+        public string DictionaryFormReading { get; set; }
         public string ConjugatedForm { get; set; }
         public string Inflection { get; set; }
         public bool? IsIndependent { get; set; }

@@ -42,7 +42,7 @@ namespace DidacticalEnigma.Core.Models.LanguageService
         public IEnumerable<string> PartOfSpeechSections { get; }
 
         public IEnumerable<PartOfSpeechInfo> GetPartOfSpeechInfo() => PartOfSpeechSections.Select(MeCabEntryParser.PartOfSpeechInfoFromString);
-
+        
         public string ConjugatedForm { get; }
 
         public string Inflection { get; }

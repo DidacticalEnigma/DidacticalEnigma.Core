@@ -48,7 +48,7 @@ namespace DidacticalEnigma.Core.Models.LanguageService
                 case "特殊・デス":
                     return Option.None<EdictPartOfSpeech>();
                 case "カ変・来ル":
-                    return Option.None<EdictPartOfSpeech>();
+                    return Option.Some(EdictPartOfSpeech.vk);
                 case "五段・ラ行特殊":
                     return Option.None<EdictPartOfSpeech>();
                 case "特殊・タイ":

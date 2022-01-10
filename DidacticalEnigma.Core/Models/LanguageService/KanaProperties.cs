@@ -13,11 +13,36 @@ namespace DidacticalEnigma.Core.Models.LanguageService
         int? LargeKanaOf(int codePoint);
         int? SmallKanaOf(int codePoint);
         string ToHiragana(string input);
+        string ToKatakana(string input);
         string LookupRomaji(string s);
     }
 
     public class KanaProperties2 : IKanaProperties, IRelated
     {
+        public string ToKatakana(string input)
+        {
+            return StringExt.FromCodePoints(input.AsCodePoints().Select(c =>
+            {
+                if (hiraganaKatakanaMap.TryGetValue(c, out var katakanaCodePoint))
+                {
+                    return katakanaCodePoint;
+                }
+                else
+                {
+                    // maybe it's a small version?
+                    var large = OppositeSizedVersionOf(c);
+                    if (large.HasValue && hiraganaKatakanaMap.TryGetValue(large.Value, out katakanaCodePoint))
+                    {
+                        return OppositeSizedVersionOf(katakanaCodePoint).Value;
+                    }
+                    else
+                    {
+                        return c;
+                    }
+                }
+            }));
+        }
+
         public string LookupRomaji(string s)
         {
             kanaToRomaji.TryGetValue(s, out var value);

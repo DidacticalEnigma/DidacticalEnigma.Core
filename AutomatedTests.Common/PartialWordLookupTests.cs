@@ -92,7 +92,7 @@ namespace AutomatedTests
                 Path.Combine(dataDir, "dictionaries", "jgram.cache")));
             kernel.BindFactory(get => new RadkfileKanjiAliveCorrelator(Path.Combine(dataDir, "character", "radkfile_kanjilive_correlation_data.txt")));
             kernel.Bind<IRadicalSearcher, RadicalSearcher>();
-            kernel.BindFactory(get => new SentenceParser(get.Get<IMorphologicalAnalyzer<IEntry>>(), get.Get<JMDictLookup>()));
+            kernel.BindFactory(get => new SentenceParser(get.Get<IMorphologicalAnalyzer<IEntry>>(), get.Get<JMDictLookup>(), get.Get<IKanaProperties>()));
             kernel.Bind<ISentenceParser, SentenceParser>();
             kernel.BindFactory(get => new RadicalSearcher(
                 get.Get<KanjiRadicalLookup>().AllRadicals,

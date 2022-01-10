@@ -22,6 +22,7 @@ namespace DidacticalEnigma.Core.Models.LanguageService
 
         public IEnumerable<TMeCabEntry> ParseToEntries(string text)
         {
+            text = text.ReplaceLineEndings(" ");
             TMeCabEntry FromNode(MeCabNode node)
             {
                 bool IsRegular(MeCabNode n) =>

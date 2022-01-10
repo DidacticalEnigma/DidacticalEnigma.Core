@@ -19,13 +19,16 @@ namespace DidacticalEnigma.Core.Models.LanguageService
         public Option<EdictPartOfSpeech> Type { get; }
 
         public string Reading { get; }
+        
+        public string DictionaryFormReading { get; }
 
         public WordInfo(
             string word,
             PartOfSpeech partOfSpeech = PartOfSpeech.Unknown,
             string dictionaryForm = null,
             Option<EdictPartOfSpeech> type = default,
-            string reading = null)
+            string reading = null,
+            string dictionaryFormReading = null)
         {
             RawWord = word;
             CodePoints = new List<CodePoint>(
@@ -34,6 +37,7 @@ namespace DidacticalEnigma.Core.Models.LanguageService
             DictionaryForm = dictionaryForm;
             Type = type;
             Reading = reading;
+            DictionaryFormReading = dictionaryFormReading;
         }
     }
 }

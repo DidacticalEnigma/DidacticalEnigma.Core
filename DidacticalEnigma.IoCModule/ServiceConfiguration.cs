@@ -127,7 +127,7 @@ namespace DidacticalEnigma.IoCModule
                 new KanaProperties2(Path.Combine(dataDirectory, "character", "kana.txt"), Encoding.UTF8));
             kernel.Bind(get =>
                 new SimilarKanji(Path.Combine(dataDirectory, "character", "kanji.tgz_similars.ut8"), Encoding.UTF8));
-            kernel.Bind(get => new SentenceParser(get.Get<IMorphologicalAnalyzer<IEntry>>(), get.Get<JMDictLookup>()));
+            kernel.Bind(get => new SentenceParser(get.Get<IMorphologicalAnalyzer<IEntry>>(), get.Get<JMDictLookup>(), get.Get<IKanaProperties>()));
             kernel.Bind<ISentenceParser, SentenceParser>();
             kernel.Bind<IRelated>(get =>
                 new CompositeRelated(

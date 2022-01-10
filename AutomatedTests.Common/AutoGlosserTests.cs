@@ -238,7 +238,7 @@ namespace AutomatedTests
                 UseMemoryMappedFile = true
             });
             this.jmdict = JDict.JMDictLookup.Create(TestDataPaths.JMDict, TestDataPaths.JMDictCache);
-            var parser = new SentenceParser(mecab, jmdict);
+            var parser = new SentenceParser(mecab, jmdict, kanaProperties);
             glosser = new AutoGlosserNext(parser, jmdict, kanaProperties);
         }
 
