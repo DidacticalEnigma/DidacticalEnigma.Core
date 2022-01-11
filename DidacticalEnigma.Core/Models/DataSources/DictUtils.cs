@@ -146,7 +146,7 @@ namespace DidacticalEnigma.Core.Models.DataSources
                     rich.Paragraphs.Add(new TextParagraph(new[]
                     {
                         new Text("The entries below are a result of lookup on the base form: "),
-                        new Text(request.NotInflected, emphasis: true)
+                        new Text(deconjugationResult, emphasis: true)
                     }));
                     foreach (var p in render(entry))
                     {
