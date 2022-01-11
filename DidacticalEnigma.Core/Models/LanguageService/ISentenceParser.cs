@@ -4,6 +4,6 @@ namespace DidacticalEnigma.Core.Models.LanguageService
 {
     public interface ISentenceParser
     {
-        IEnumerable<WordInfo> BreakIntoWords(string input);
+        IEnumerable<IEnumerable<WordInfo>> BreakIntoSentences(string input);
     }
 }
