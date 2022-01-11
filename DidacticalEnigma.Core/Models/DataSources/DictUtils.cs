@@ -135,6 +135,25 @@ namespace DidacticalEnigma.Core.Models.DataSources
                     }
                 }
             }
+            
+            if (rich.Paragraphs.Count == 0)
+            {
+                var deconjugationResult = LibJpConjSharp.JpConj.Deconjugate(rawWord)
+                    .FirstOrDefault()?.Base;
+                entry = deconjugationResult != null ? lookup(deconjugationResult) : null;
+                if (entry != null)
+                {
+                    rich.Paragraphs.Add(new TextParagraph(new[]
+                    {
+                        new Text("The entries below are a result of lookup on the base form: "),
+                        new Text(request.NotInflected, emphasis: true)
+                    }));
+                    foreach (var p in render(entry))
+                    {
+                        rich.Paragraphs.Add(p);
+                    }
+                }
+            }
 
             if (rich.Paragraphs.Count == 0)
                 return Task.FromResult(Option.None<RichFormatting>());
