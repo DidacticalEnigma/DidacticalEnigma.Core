@@ -39,6 +39,8 @@ namespace DidacticalEnigma.IoCModule
             kernel.Bind(() =>
                 new BasicExpressionsCorpus(Path.Combine(dataDirectory, "corpora", "JEC_basic_sentence_v1-2.csv"),
                     Encoding.UTF8));
+            kernel.Bind(() =>
+                new JMDictEntrySorter());
             kernel.Bind<IMorphologicalAnalyzer<IpadicEntry>>(() => new MeCabIpadic(new MeCabParam
             {
                 DicDir = Path.Combine(dataDirectory, "mecab", "ipadic"),
@@ -80,8 +82,8 @@ namespace DidacticalEnigma.IoCModule
                 new AutoGlosserNext(get.Get<ISentenceParser>(), get.Get<JMDictLookup>(), get.Get<IKanaProperties>()));
             kernel.Bind(get => new CharacterDataSource(get.Get<IKanjiProperties>(), get.Get<IKanaProperties>()));
             kernel.Bind(get => new CharacterStrokeOrderDataSource());
-            kernel.Bind(get => new JMDictDataSource(get.Get<JMDictLookup>(), get.Get<IKanaProperties>()));
-            kernel.Bind(get => new JMDictCompactDataSource(get.Get<JMDictLookup>(), get.Get<IKanaProperties>()));
+            kernel.Bind(get => new JMDictDataSource(get.Get<JMDictLookup>(), get.Get<IKanaProperties>(), get.Get<JMDictEntrySorter>()));
+            kernel.Bind(get => new JMDictCompactDataSource(get.Get<JMDictLookup>(), get.Get<IKanaProperties>(), get.Get<JMDictEntrySorter>()));
             kernel.Bind(get => new JNeDictDataSource(get.Get<JMNedictLookup>()));
             kernel.Bind(get => new VerbConjugationDataSource(get.Get<JMDictLookup>()));
             kernel.Bind(get => new WordFrequencyRatingDataSource(get.Get<FrequencyList>()));

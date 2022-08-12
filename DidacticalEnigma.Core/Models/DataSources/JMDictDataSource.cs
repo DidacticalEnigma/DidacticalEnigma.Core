@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using DidacticalEnigma.Core.Models.Formatting;
 using DidacticalEnigma.Core.Models.LanguageService;
 using JDict;
+using JetBrains.Annotations;
 using Optional;
 using Utility.Utils;
 
@@ -15,6 +16,7 @@ namespace DidacticalEnigma.Core.Models.DataSources
     {
         private readonly JMDictLookup jdict;
         private readonly IKanaProperties kana;
+        [CanBeNull] private readonly JMDictEntrySorter sorter;
 
         public static DataSourceDescriptor Descriptor { get; } = new DataSourceDescriptor(
             new Guid("ED1B840C-B2A8-4018-87B0-D5FC64A1ABC8"),
@@ -29,7 +31,7 @@ namespace DidacticalEnigma.Core.Models.DataSources
                 t => jdict.Lookup(t),
                 r => GreedyLookup(r),
                 kana,
-                Render);
+                e => Render(e, request));
         }
 
         private (IEnumerable<JMDictEntry> entry, string word) GreedyLookup(Request request, int backOffCountStart = 5)
@@ -40,9 +42,10 @@ namespace DidacticalEnigma.Core.Models.DataSources
             return DictUtils.GreedyLookup(s => jdict.Lookup(s), request.SubsequentWords, backOffCountStart);
         }
 
-        private IEnumerable<Paragraph> Render(IEnumerable<JMDictEntry> entries)
+        private IEnumerable<Paragraph> Render(IEnumerable<JMDictEntry> entries, Request request)
         {
-            foreach (var entry in entries)
+            var sortedEntries = sorter != null ? sorter.Sort(entries, request) : entries;
+            foreach (var entry in sortedEntries)
             {
                 var l = new List<Text>();
                 {
@@ -207,10 +210,14 @@ namespace DidacticalEnigma.Core.Models.DataSources
             return Task.FromResult(UpdateResult.NotSupported);
         }
 
-        public JMDictDataSource(JMDictLookup jdict, IKanaProperties kana)
+        public JMDictDataSource(
+            JMDictLookup jdict,
+            IKanaProperties kana,
+            [CanBeNull] JMDictEntrySorter sorter = null)
         {
             this.jdict = jdict;
             this.kana = kana;
+            this.sorter = sorter;
         }
         
         public string InstanceIdentifier => null;

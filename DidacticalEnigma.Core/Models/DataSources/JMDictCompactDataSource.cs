@@ -15,17 +15,22 @@ public class JMDictCompactDataSource : IDataSource
 {
     [NotNull] private readonly JMDictLookup jdict;
     [NotNull] private readonly IKanaProperties kana;
-    
+    [CanBeNull] private readonly JMDictEntrySorter sorter;
+
     public static DataSourceDescriptor Descriptor { get; } = new DataSourceDescriptor(
         new Guid("F753F375-9501-408F-837B-92452C0A34E7"),
         "JMDict (Compact)",
         "The data JMdict by Electronic Dictionary Research and Development Group",
         new Uri("http://www.edrdg.org/jmdict/j_jmdict.html"));
 
-    public JMDictCompactDataSource([NotNull] JMDictLookup jdict, [NotNull] IKanaProperties kana)
+    public JMDictCompactDataSource(
+        [NotNull] JMDictLookup jdict,
+        [NotNull] IKanaProperties kana,
+        [CanBeNull] JMDictEntrySorter sorter = null)
     {
         this.jdict = jdict ?? throw new ArgumentNullException(nameof(jdict));
         this.kana = kana ?? throw new ArgumentNullException(nameof(kana));
+        this.sorter = sorter;
     }
 
     public void Dispose()
@@ -39,6 +44,8 @@ public class JMDictCompactDataSource : IDataSource
 
         var jmDictEntries = jdict.Lookup(request.NotInflected ?? request.QueryText)
             ?? Enumerable.Empty<JMDictEntry>();
+
+        jmDictEntries = sorter != null ? sorter.Sort(jmDictEntries, request) : jmDictEntries;
 
         if (request.Word.DictionaryFormReading != null)
         {
