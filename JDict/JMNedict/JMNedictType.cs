@@ -69,5 +69,7 @@ namespace JDict
         doc,
         [Description("group")]
         group,
+        [Description("ship name")]
+        ship,
     }
 }

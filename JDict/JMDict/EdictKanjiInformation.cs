@@ -17,5 +17,7 @@ namespace JDict
         oK,
         [Description("rarely-used kanji form")]
         rK,
+        [Description("search-only kanji form")]
+        sK,
     }
 }

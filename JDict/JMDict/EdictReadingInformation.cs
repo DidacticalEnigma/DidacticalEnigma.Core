@@ -15,5 +15,7 @@ namespace JDict
         oik,
         [Description("word usually written using kanji alone")]
         uK,
+        [Description("search-only kana form")]
+        sk,
     }
 }

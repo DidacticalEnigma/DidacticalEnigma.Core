@@ -149,5 +149,33 @@ namespace JDict
         vidg,
         [Description("architecture")]
         archit,
+        [Description("card games")]
+        cards,
+        [Description("dentistry")]
+        dent,
+        [Description("film")]
+        film,
+        [Description("kabuki")]
+        kabuki,
+        [Description("manga")]
+        manga,
+        [Description("mining")]
+        mining,
+        [Description("noh")]
+        noh,
+        [Description("politics")]
+        politics,
+        [Description("psychoanalysis")]
+        psyanal,
+        [Description("Roman mythology")]
+        rommyth,
+        [Description("ship name")]
+        ship,
+        [Description("skiing")]
+        ski,
+        [Description("stock market")]
+        stockm,
+        [Description("television")]
+        tv,
     }
 }

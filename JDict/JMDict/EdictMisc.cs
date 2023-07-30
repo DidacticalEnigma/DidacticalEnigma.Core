@@ -119,5 +119,7 @@ namespace JDict
         station,
         [Description("organization name")]
         organization,
+        [Description("euphemistic")]
+        euph,
     }
 }
