@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DidacticalEnigma.Core.Models.Formatting;
@@ -51,9 +52,12 @@ public class SameKanjiReadingDataSource : IDataSource
                     foreach (var entry in entries)
                     {
                         texts.Add(new Text(entry.Literal));
-                        texts.Add(new Text("("));
-                        texts.Add(new Text(string.Join(", ", entry.Meanings)));
-                        texts.Add(new Text(")"));
+                        if (entry.Meanings.Any())
+                        {
+                            texts.Add(new Text(" ("));
+                            texts.Add(new Text(string.Join(", ", entry.Meanings)));
+                            texts.Add(new Text(") "));
+                        }
                     }
                     p = new TextParagraph(texts);
                     document.Paragraphs.Add(p);

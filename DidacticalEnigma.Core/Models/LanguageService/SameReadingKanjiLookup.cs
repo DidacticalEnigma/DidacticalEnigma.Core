@@ -34,7 +34,7 @@ public class SameReadingKanjiLookup
                 .Concat(kanjiEntry.OnReadings)
                 .ToHashSet();
 
-        var sameKanji = kanjiDict.LookupByReading(readings).ToList();
+        var sameKanji = kanjiDict.LookupByReading(readings).OrderBy(k => k.FrequencyRating).ToList();
 
         return new Result(
             Character: kanjiEntry.Literal,

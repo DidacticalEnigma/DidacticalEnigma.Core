@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Text;
 using DidacticalEnigma.Core.Models.LanguageService;
 using JDict;
@@ -28,7 +29,9 @@ public class SameKanjiReadingLookupTests
         Assert.IsTrue(option.HasValue);
         option.MatchSome(result =>
         {
-            ;
+            var entries = result.KanjiWithSameReading.First(x => x.Key == "セン").Value;
+            var entry = entries.FirstOrDefault(e => e.Literal == "戦");
+            Assert.NotNull(entry);
         });
     }
 }
