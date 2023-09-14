@@ -231,6 +231,9 @@ namespace JDict
                         case "serv":
                             type = JMNedictType.serv; 
                             break;
+                        case "ship":
+                            type = JMNedictType.ship; 
+                            break;
                         case "station":
                             type = JMNedictType.station; 
                             break;
