@@ -9,39 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\AutomatedTests.Common\AutoGlosserTests.cs" Link="AutoGlosserTests.cs" />
-    <Compile Include="..\AutomatedTests.Common\DependentOnKenkyuushaAttribute.cs" Link="DependentOnKenkyuushaAttribute.cs" />
-    <Compile Include="..\AutomatedTests.Common\DualDictionaryTests.cs" Link="DualDictionaryTests.cs" />
-    <Compile Include="..\AutomatedTests.Common\EnumerableExt.cs" Link="EnumerableExt.cs" />
-    <Compile Include="..\AutomatedTests.Common\ExpectactionTester.cs" Link="ExpectactionTester.cs" />
-    <Compile Include="..\AutomatedTests.Common\IdiomDetectorTests.cs" Link="IdiomDetectorTests.cs" />
-    <Compile Include="..\AutomatedTests.Common\Index.cs" Link="Index.cs" />
-    <Compile Include="..\AutomatedTests.Common\JGramTests.cs" Link="JGramTests.cs" />
-    <Compile Include="..\AutomatedTests.Common\JMDictTests.cs" Link="JMDictTests.cs" />
-    <Compile Include="..\AutomatedTests.Common\JMDictXml.cs" Link="JMDictXml.cs" />
-    <Compile Include="..\AutomatedTests.Common\JnedictTests.cs" Link="JnedictTests.cs" />
-    <Compile Include="..\AutomatedTests.Common\JNedictXml.cs" Link="JNedictXml.cs" />
-    <Compile Include="..\AutomatedTests.Common\KanaPropertiesTests.cs" Link="KanaPropertiesTests.cs" />
-    <Compile Include="..\AutomatedTests.Common\KanjiAliveJapaneseRadicalInformationTests.cs" Link="KanjiAliveJapaneseRadicalInformationTests.cs" />
-    <Compile Include="..\AutomatedTests.Common\KanjiDictTests.cs" Link="KanjiDictTests.cs" />
-    <Compile Include="..\AutomatedTests.Common\KanjiRadicalLookupTests.cs" Link="KanjiRadicalLookupTests.cs" />
-    <Compile Include="..\AutomatedTests.Common\Kradfile.cs" Link="Kradfile.cs" />
-    <Compile Include="..\AutomatedTests.Common\MeCab.cs" Link="MeCab.cs" />
-    <Compile Include="..\AutomatedTests.Common\PartialWordLookupTests.cs" Link="PartialWordLookupTests.cs" />
-    <Compile Include="..\AutomatedTests.Common\RadicalSearcherTests.cs" Link="RadicalSearcherTests.cs" />
-    <Compile Include="..\AutomatedTests.Common\Romaji.cs" Link="Romaji.cs" />
-    <Compile Include="..\AutomatedTests.Common\Sandbox.cs" Link="Sandbox.cs" />
-    <Compile Include="..\AutomatedTests.Common\SentenceParserTests.cs" Link="SentenceParserTests.cs" />
-    <Compile Include="..\AutomatedTests.Common\SerializerExtTests.cs" Link="SerializerExtTests.cs" />
-    <Compile Include="..\AutomatedTests.Common\StringExtTests.cs" Link="StringExtTests.cs" />
-    <Compile Include="..\AutomatedTests.Common\Tagger.cs" Link="Tagger.cs" />
-    <Compile Include="..\AutomatedTests.Common\TestDataPaths.cs" Link="TestDataPaths.cs" />
-    <Compile Include="..\AutomatedTests.Common\VerbInflecterDataSourceTests.cs" Link="VerbInflecterDataSourceTests.cs" />
-    <Compile Include="..\AutomatedTests.Common\Yomichan.cs" Link="Yomichan.cs" />
-    <Compile Include="..\AutomatedTests.Common\ZipTests.cs" Link="ZipTests.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Gu.Inject" Version="0.1.0-dev" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
     <PackageReference Include="NMeCabNetStandard" Version="0.7.3" />

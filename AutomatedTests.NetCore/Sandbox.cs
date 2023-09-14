@@ -38,11 +38,45 @@ namespace AutomatedTests
         {
             kernel.Dispose();
         }
+
+        [Explicit]
+        [Test]
+        public async Task Words()
+        {
+            var entries = jmdict.AllEntries()
+                .Where(e =>
+                {
+                    bool any = e.Senses.Any(s =>
+                    {
+                        bool isVerb = s.PartOfSpeechInfo.Any(t => t < EdictPartOfSpeech.v_unspec);
+                        
+                        bool isIntransitive = s.PartOfSpeechInfo.Any(t => t == EdictPartOfSpeech.vi);
+                        bool isTransitive = s.PartOfSpeechInfo.Any(t => t == EdictPartOfSpeech.vt);
+                        
+                        bool isSuruVerb = s.PartOfSpeechInfo.Any(t => t == EdictPartOfSpeech.vs) ||
+                                          s.PartOfSpeechInfo.Any(t => t == EdictPartOfSpeech.vs_s) ||
+                                          s.PartOfSpeechInfo.Any(t => t == EdictPartOfSpeech.vs_i);
+                        bool isExpression = s.PartOfSpeechInfo.Any(t => t == EdictPartOfSpeech.exp);
+
+                        return isVerb && !isIntransitive && !isTransitive && !isSuruVerb && !isExpression;
+                    });
+
+                    return any;
+                });
+
+            foreach (var entry in entries)
+            {
+                Console.WriteLine("K: {0}", string.Join("; ", entry.KanjiEntries.Select(x => x.Kanji)));
+                Console.WriteLine("R: {0}", string.Join("; ", entry.ReadingEntries.Select(x => x.Reading)));
+            }
+        }
         
         [Explicit]
         [Test]
         public async Task Sandbox()
         {
+            var unidicEntry = new UnidicEntry("切", "形状詞,一般,*,*,*,*,セツ,切,切,セツ,切,セツ,漢,*,*,*,*,*,*,相,セツ,セツ,セツ,セツ,1,C3,*,19579287057342976,71229".Some());
+
             var xmlRenderer = new XmlRichFormattingRenderer();
             var jmdictSource = new JMDictCompactDataSource(jmdict, kanaProperties);
             var request = new Request(
