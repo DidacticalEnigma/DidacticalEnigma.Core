@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using JDict.Xml;
 using System.Collections.Generic;
 using System.IO;
@@ -8,6 +9,7 @@ using System.Xml;
 using System.Xml.Serialization;
 using Optional;
 using Optional.Collections;
+using Utility.Utils;
 
 namespace JDict
 {
@@ -18,6 +20,8 @@ namespace JDict
         private Dictionary<string, KanjiEntry> root;
 
         private Dictionary<int, KanjiEntry> codePointLookup;
+
+        private List<KanjiEntry> allEntries;
 
         private KanjiDict Init(Stream stream)
         {
@@ -33,12 +37,14 @@ namespace JDict
             {
                 root = new Dictionary<string, KanjiEntry>();
                 codePointLookup = new Dictionary<int, KanjiEntry>();
+                allEntries = new List<KanjiEntry>();
                 var xmlEntries = ((KanjiDictRoot)serializer.Deserialize(xmlReader)).Characters;
                 foreach (var xmlEntry in xmlEntries)
                 {
                     var entry = new KanjiEntry(xmlEntry);
                     codePointLookup.Add(entry.CodePoint, entry);
                     root.Add(entry.Literal, entry);
+                    allEntries.Add(entry);
                 }
             }
             return this;
@@ -52,6 +58,15 @@ namespace JDict
         public Option<KanjiEntry> Lookup(string v)
         {
             return root.GetValueOrNone(v);
+        }
+
+        // nanori readings are ignored by this function
+        public IEnumerable<KanjiEntry> LookupByReading(IReadOnlySet<string> readings)
+        {
+            return allEntries.Where(entry =>
+            {
+                return entry.KunReadings.Concat(entry.OnReadings).Any(reading => readings.Contains(reading));
+            });
         }
 
         private KanjiDict Init(string path)
@@ -111,31 +126,33 @@ namespace JDict
             Meanings = GetMeanings(ch, "en");
             NanoriReadings = GetNanori(ch);
 
-            List<string> GetNanori(KanjiCharacter c)
+            IReadOnlyCollection<string> GetNanori(KanjiCharacter c)
             {
                 return (c.ReadingsAndMeanings?.Nanori ?? Enumerable.Empty<KanjiNanori>())
                     .Select(n => n.Value)
                     .ToList();
             }
 
-            List<string> GetMeanings(KanjiCharacter c, string lang)
+            IReadOnlyCollection<string> GetMeanings(KanjiCharacter c, string lang)
             {
                 return c.ReadingsAndMeanings?.Groups
                     .FirstOrNone()
                     .FlatMap(x => (x.Meanings?.Where(m => (m.Language ?? "en") == lang)).SomeNotNull())
                     .ValueOr(Enumerable.Empty<KanjiMeaning>())
                     .Select(reading => reading.Value)
-                    .ToList();
+                    .Materialize()
+                    ?? Array.Empty<string>();
             }
 
-            List<string> GetReadings(KanjiCharacter c, string type)
+            IReadOnlyCollection<string> GetReadings(KanjiCharacter c, string type)
             {
                 return c.ReadingsAndMeanings?.Groups
                     .FirstOrNone()
                     .FlatMap(x => (x.Readings?.Where(r => r.ReadingType == type)).SomeNotNull())
                     .ValueOr(Enumerable.Empty<KanjiReading>())
                     .Select(reading => reading.Value)
-                    .ToList();
+                    .Materialize()
+                    ?? Array.Empty<string>();
             }
         }
     }

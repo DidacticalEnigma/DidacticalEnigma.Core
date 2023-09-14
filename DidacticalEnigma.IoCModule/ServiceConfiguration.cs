@@ -97,6 +97,7 @@ namespace DidacticalEnigma.IoCModule
             kernel.Bind(get => new PartialWordLookupJMDictDataSource(get.Get<PartialWordLookup>(), get.Get<FrequencyList>()));
             kernel.Bind(get => new JESCDataSource(get.Get<JESC>()));
             kernel.Bind(get => new RomajiDataSource(get.Get<IRomaji>()));
+            kernel.Bind(get => new SameKanjiReadingDataSource(get.Get<SameReadingKanjiLookup>()));
 
             var epwingDictionaries = CreateEpwing(dataDirectory, cacheDirectory);
             
@@ -120,6 +121,7 @@ namespace DidacticalEnigma.IoCModule
                     get => get.Get<PartialWordLookupJMDictDataSource>(),
                     get => get.Get<JESCDataSource>(),
                     get => get.Get<RomajiDataSource>(),
+                    get => get.Get<SameKanjiReadingDataSource>(),
                 }.Concat(epwingDictionaries.Dictionaries
                     .Select(dict => new Func<IReadOnlyKernel, IDataSource>(
                         get => new EpwingDataSource(dict, get.Get<IKanaProperties>())))));
@@ -176,6 +178,9 @@ namespace DidacticalEnigma.IoCModule
             kernel.Bind(get => new KanjiAliveJapaneseRadicalInformation(
                 KanjiAliveJapaneseRadicalInformation.Parse(
                     Path.Combine(dataDirectory, "character", "japanese-radicals.csv"))));
+            kernel.Bind(get => new SameReadingKanjiLookup(
+                get.Get<KanjiDict>(),
+                get.Get<IKanaProperties>()));
             return dataSourceCollection;
         }
         
