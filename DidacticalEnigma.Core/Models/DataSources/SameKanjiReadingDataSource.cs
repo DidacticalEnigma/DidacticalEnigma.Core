@@ -56,8 +56,9 @@ public class SameKanjiReadingDataSource : IDataSource
                         {
                             texts.Add(new Text(" ("));
                             texts.Add(new Text(string.Join(", ", entry.Meanings)));
-                            texts.Add(new Text(") "));
+                            texts.Add(new Text(")"));
                         }
+                        texts.Add(new Text("; "));
                     }
                     p = new TextParagraph(texts);
                     document.Paragraphs.Add(p);
