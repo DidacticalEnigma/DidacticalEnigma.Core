@@ -177,5 +177,28 @@ namespace JDict
         stockm,
         [Description("television")]
         tv,
+        [Description("boxing")]
+        boxing,
+        [Description("Chinese mythology")]
+        chmyth,
+        [Description("civil engineering")]
+        civeng,
+        [Description("figure skating")]
+        figskt,
+        [Description("Internet")]
+        internet,
+        [Description("Japanese mythology")]
+        jpmyth,
+        [Description("mineralogy")]
+        min,
+        [Description("motorsport")]
+        motor,
+        [Description("professional wrestling")]
+        prowres,
+        [Description("surgery")]
+        surg,
+        [Description("veterinary terms")]
+        vet,
+
     }
 }

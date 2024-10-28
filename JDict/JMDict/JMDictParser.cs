@@ -562,6 +562,31 @@ namespace JDict
                         case "tradem": field = EdictField.tradem; break;
                         case "vidg": field = EdictField.vidg; break;
                         case "zool": field = EdictField.zool; break;
+                        case "cards": field = EdictField.cards; break;
+                        case "dent": field = EdictField.dent; break;
+                        case "film": field = EdictField.film; break;
+                        case "kabuki": field = EdictField.kabuki; break;
+                        case "manga": field = EdictField.manga; break;
+                        case "mining": field = EdictField.mining; break;
+                        case "noh": field = EdictField.noh; break;
+                        case "politics": field = EdictField.politics; break;
+                        case "psyanal": field = EdictField.psyanal; break;
+                        case "rommyth": field = EdictField.rommyth; break;
+                        case "ship": field = EdictField.ship; break;
+                        case "ski": field = EdictField.ski; break;
+                        case "stockm": field = EdictField.stockm; break;
+                        case "tv": field = EdictField.tv; break;
+                        case "boxing": field = EdictField.boxing; break;
+                        case "chmyth": field = EdictField.chmyth; break;
+                        case "civeng": field = EdictField.civeng; break;
+                        case "figskt": field = EdictField.figskt; break;
+                        case "internet": field = EdictField.internet; break;
+                        case "jpmyth": field = EdictField.jpmyth; break;
+                        case "min": field = EdictField.min; break;
+                        case "motor": field = EdictField.motor; break;
+                        case "prowres": field = EdictField.prowres; break;
+                        case "surg": field = EdictField.surg; break;
+                        case "vet": field = EdictField.vet; break;
                     }
                 }
             }
@@ -613,6 +638,9 @@ namespace JDict
                         case "ik": reInf = EdictReadingInformation.ik; break;
                         case "ok": reInf = EdictReadingInformation.ok; break;
                         case "uK": reInf = EdictReadingInformation.uK; break;
+                        case "sk": reInf = EdictReadingInformation.sk; break;
+                        case "oik": reInf = EdictReadingInformation.oik; break;
+                        case "rk": reInf = EdictReadingInformation.rk; break;
                     }
                 }
             }

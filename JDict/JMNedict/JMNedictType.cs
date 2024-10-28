@@ -71,5 +71,6 @@ namespace JDict
         group,
         [Description("ship name")]
         ship,
+        
     }
 }

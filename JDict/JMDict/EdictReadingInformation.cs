@@ -17,5 +17,7 @@ namespace JDict
         uK,
         [Description("search-only kana form")]
         sk,
+        [Description("rarely used kana form")]
+        rk,
     }
 }
